@@ -1,16 +1,13 @@
 import numpy as np
-from simpleNet.core.Layer import Layer
+from simpleNet.layers.Layer import Layer
 
 
 class Dense(Layer):
 
     def __init__(self, input_num: int, hidden_num: int, use_bias: bool == "True"):
-        super(Layer, self).__init__()
+        super().__init__()
         self.hidden_num = hidden_num
         self.use_bias = use_bias
-        self.weights = None
-        self.cached_x = None
-        self.cached_grad = None
 
         w = np.random.rand(input_num, self.hidden_num)
         self.weights = [w]

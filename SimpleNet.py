@@ -2,6 +2,7 @@ import simpleNet
 from simpleNet.MeanSqauredError import MeanSquaredError
 from simpleNet.Moduel import Moduel
 import numpy as np
+from simpleNet.optim import Adam
 
 x = np.random.rand(4, 5)
 y = np.array([6, 0, 2, 1])
@@ -21,12 +22,13 @@ class Model(Moduel):
 
 model = Model()
 criterion = MeanSquaredError()
+optim = Adam(model)
 
 for i in range(10000):
     y_pred = model.forwards(x)
     loss = criterion(y_pred, y)
     da = criterion.backwards()
     model.backwards(da)
-    model.learn(0.01)
+    optim.step()
 
 print(model.forwards(x))

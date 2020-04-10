@@ -1,4 +1,4 @@
-from simpleNet.core.Layer import Layer
+from simpleNet.layers.Layer import Layer
 
 """
     持有各层
@@ -26,8 +26,3 @@ class Moduel:
         for i in reversed(range(len(self.layers))):
             layer = self.layers[i]
             da_prev = layer.backwards(da_prev)
-
-    def learn(self, lr:float):
-
-        for layer in self.layers:
-            layer.learn(lr)
