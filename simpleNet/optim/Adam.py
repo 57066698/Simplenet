@@ -17,6 +17,7 @@ class Adam:
         self.hom = 10e-8
 
     def zero_grad(self):
+        self.num_step = 1
         for layer in self.model.layers:
             for i in range(len(layer.cached_grad)):
                 layer.grads.append({"s":0, "r":0})
@@ -37,7 +38,7 @@ class Adam:
 
                 s = self.fy1 * s + (1 - self.fy1) * grad
                 r = self.fy2 * r + (1 - self.fy2) * grad * grad
-                s_hat = s / (1-self.fy1**(self.num_step+1))
-                r_hat = r / (1-self.fy2**(self.num_step+1))
+                s_hat = s / (1-self.fy1**self.num_step)
+                r_hat = r / (1-self.fy2**self.num_step)
                 theta = - self.lr * (s_hat / (r_hat ** 0.5 + self.hom))
                 layer.weights[i] += theta

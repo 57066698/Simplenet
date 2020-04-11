@@ -4,7 +4,7 @@ from simpleNet.layers.Layer import Layer
 
 class Dense(Layer):
 
-    def __init__(self, input_num: int, hidden_num: int, use_bias: bool == "True"):
+    def __init__(self, input_num: int, hidden_num: int, use_bias: bool = True):
         super().__init__()
         self.hidden_num = hidden_num
         self.use_bias = use_bias
@@ -32,13 +32,8 @@ class Dense(Layer):
         dw = x.transpose().dot(da)
         self.cached_grad = [dw]
         if self.use_bias:
-            db = np.sum(da) / da.shape[0]
+            db = np.sum(da, axis=0)
             self.cached_grad.append(db)
         w_T = self.weights[0].transpose()
         a_prev = np.matmul(da, w_T)
         return a_prev
-
-    def learn(self, lr: float):
-        self.weights[0] -= lr * self.cached_grad[0]
-        if self.use_bias:
-            self.weights[1] -= lr * self.cached_grad[1]

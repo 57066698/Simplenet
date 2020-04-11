@@ -1,5 +1,5 @@
 import simpleNet
-from simpleNet.MeanSqauredError import MeanSquaredError
+from simpleNet.loss.MeanSqauredError import MeanSquaredError
 from simpleNet.Moduel import Moduel
 import numpy as np
 from simpleNet.optim import Adam
@@ -24,7 +24,7 @@ model = Model()
 criterion = MeanSquaredError()
 optim = Adam(model)
 
-for i in range(10000):
+for i in range(1000):
     y_pred = model.forwards(x)
     loss = criterion(y_pred, y)
     da = criterion.backwards()

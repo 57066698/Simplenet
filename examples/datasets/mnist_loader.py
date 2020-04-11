@@ -22,7 +22,7 @@ def _load(img_file_name, label_file_name):
     data = np.frombuffer(buf, dtype=np.uint8).astype(np.float32)
     X = data.reshape(-1, image_size, image_size, 1)
 
-    f = gzip.open(label_file_name, 'r')
+    f = gzip.open(os.path.dirname(__file__) + "/" + label_file_name, 'r')
     f.read(8)
     buf = f.read()
     Y = np.frombuffer(buf, dtype=np.uint8).astype(np.int64)
