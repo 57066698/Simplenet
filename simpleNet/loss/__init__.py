@@ -1,2 +1,0 @@
-from simpleNet.loss.MeanSqauredError import MeanSquaredError
-from simpleNet.loss.CrossEntropy import CrossEntropy

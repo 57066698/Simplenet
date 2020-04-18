@@ -6,6 +6,7 @@ class Dense(Layer):
 
     def __init__(self, input_num: int, hidden_num: int, use_bias: bool = True):
         super().__init__()
+        self.name = "Dense"
         self.hidden_num = hidden_num
         self.use_bias = use_bias
 
@@ -37,3 +38,6 @@ class Dense(Layer):
         w_T = self.weights[0].transpose()
         a_prev = np.matmul(da, w_T)
         return a_prev
+
+    def __str__(self):
+        return "%s: " % self.name + "hidden_num: %d, " % self.hidden_num + "use_Bias: %s" % str(self.use_bias)

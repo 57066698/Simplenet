@@ -1,8 +1,8 @@
 import simpleNet
-from simpleNet.loss.MeanSqauredError import MeanSquaredError
+from simpleNet.losses.MeanSqauredError import MeanSquaredError
 from simpleNet.Moduel import Moduel
 import numpy as np
-from simpleNet.optim import Adam
+from simpleNet.optims import Adam
 
 x = np.random.rand(4, 5)
 y = np.array([6, 0, 2, 1])

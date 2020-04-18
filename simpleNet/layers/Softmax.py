@@ -6,6 +6,7 @@ class Softmax(Layer):
 
     def __init__(self):
         super().__init__()
+        self.name = Softmax
 
     def __call__(self, *args, **kwargs):
         x = args[0]
@@ -16,3 +17,6 @@ class Softmax(Layer):
     def backwards(self, da):
         ## 只支持 cross-entropy
         return da
+
+    def __str__(self):
+        return self.name

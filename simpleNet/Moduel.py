@@ -7,39 +7,56 @@ from simpleNet.layers.Layer import Layer
 """
 
 
-class Moduel:
+class Moduel(Layer):
 
     def __init__(self):
+        super().__init__()
         self.layers = []
-        self.states = "train"
 
     def __setattr__(self, key, value):
         if isinstance(value, Layer):
             self.layers.append(value)
+            value.name = key
         self.__dict__[key] = value
 
     def __call__(self, *args, **kwargs):
-        inputs = args
-
-        if "run" in kwargs and kwargs["run"]:
+        if "run" in kwargs and kwargs["run"] == True:
             self.change_state("run")
         else:
             self.change_state("train")
-        self.forwards(*args)
+        return self.forwards(*args)
+
+    def __str__(self):
+        summary = "moduel: { \n"
+        for layer in self.layers:
+            layer_summery = str(layer)
+            lines = layer_summery.split("\n")
+            for single_line in lines:
+                summary += "  " + single_line + "\n"
+        summary += "}"
+        return summary
+
+    def change_state(self, statu):
+        if self.statu == statu:
+            return
+        assert statu in ["train", "run"]
+
+        for layer in self.layers:
+            layer.change_state(statu)
+        self.statu = statu
 
     def forwards(self, args):
-        pass
+        x = args
+        for layer in self.layers:
+            x = layer(x)
+        return x
 
     def backwards(self, da):
         da_prev = da
         for i in reversed(range(len(self.layers))):
             layer = self.layers[i]
             da_prev = layer.backwards(da_prev)
+        return da_prev
 
-    def change_state(self, state):
-        if self.states == state:
-            return
-        assert state in ["train", "run"]
-        for layer in self.layers:
-            layer.status = state
-
+    def summary(self):
+        print(str(self))

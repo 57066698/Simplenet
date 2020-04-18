@@ -2,20 +2,19 @@ from simpleNet.layers.Layer import Layer
 import numpy as np
 
 
-class Relu(Layer):
+class Flatten(Layer):
     def __init__(self):
         super().__init__()
-        self.name = "Relu"
+        self.name = "Flatten"
 
     def __call__(self, *args, **kwargs):
         x = args[0]
-        self.cached_x = x
-        x = np.maximum(0, x)
+        self.cached_shape = tuple(x.shape)
+        x = np.reshape(x, (x.shape[0], -1))
         return x
 
     def backwards(self, da):
-        da_prev = da.copy()
-        da_prev[self.cached_x < 0] = 0
+        da_prev = np.reshape(da, self.cached_shape)
         return da_prev
 
     def __str__(self):

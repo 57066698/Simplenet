@@ -17,4 +17,4 @@ class CrossEntropy:
         return ce
 
     def backwards(self):
-        return self.last_y_pred - self.last_y_pred
+        return self.last_y_pred - self.last_y_true

@@ -1,5 +1,5 @@
 import simpleNet
-from simpleNet import layers, Moduel, loss, optim
+from simpleNet import layers, Moduel, losses, optims
 from examples.datasets.mnist_loader import load_train, load_test
 import numpy as np
 
@@ -8,32 +8,49 @@ X_test, Y_test = load_test()
 
 print(X_train.shape, Y_train.shape)
 
-class Net(Moduel):
-    # forward网络, (512 Dense 0.2 Dropout) x 2 -> softmax -> crossentropy
+
+class block1(Moduel):
     def __init__(self):
         super().__init__()
 
-        self.dense1 = layers.Dense(28*28, 512)
+        self.dense1 = layers.Dense(28 * 28, 512)
         self.relu1 = layers.Relu()
         self.dropout1 = layers.Dropout(0.2)
-
-        self.dense2 = layers.Dense(512, 512)
-        self.relu2 = layers.Relu()
-        self.dropout2 = layers.Dropout(0.2)
-
-        self.dense3 = layers.Dense(512, 10)
-
-        self.softmax = layers.Softmax()
 
     def forwards(self, x):
         x = self.dense1(x)
         x = self.relu1(x)
         x = self.dropout1(x)
+        return x
 
+class block2(Moduel):
+    def __init__(self):
+        super().__init__()
+
+        self.dense2 = layers.Dense(512, 512)
+        self.relu2 = layers.Relu()
+        self.dropout2 = layers.Dropout(0.2)
+
+    def forwards(self, x):
         x = self.dense2(x)
         x = self.relu2(x)
         x = self.dropout2(x)
+        return x
 
+class Net(Moduel):
+    # forward网络, (512 Dense 0.2 Dropout) x 2 -> softmax -> crossentropy
+    def __init__(self):
+        super().__init__()
+
+        self.block1 = block1()
+        self.block2 = block2()
+
+        self.dense3 = layers.Dense(512, 10)
+        self.softmax = layers.Softmax()
+
+    def forwards(self, x):
+        x = self.block1(x)
+        x = self.block2(x)
         x = self.dense3(x)
         x = self.softmax(x)
         return x
@@ -46,8 +63,7 @@ class Gen:
         self.X = np.reshape(X, (X.shape[0], -1))
         self.X = self.X / 255.0
 
-        max_ind = np.max(Y)
-        self.Y = np.zeros((Y.shape[0], max_ind+1), dtype=np.float32)
+        self.Y = np.zeros((Y.shape[0], 10), dtype=np.float32)
 
         for i in range(Y.shape[0]):
             self.Y[i][Y[i]] = 1
@@ -67,7 +83,8 @@ class Gen:
         return batch_X, batch_Y
 
     def __len__(self):
-        return int(self.inds.shape[0] / self.batch_size) + 1
+        import math
+        return math.ceil(self.inds.shape[0] / self.batch_size)
 
     def end_epoch(self):
         np.random.shuffle(self.inds)
@@ -79,12 +96,12 @@ class Gen:
 # train
 
 net = Net()
-criterrion = loss.CrossEntropy()
-optimizer = optim.Adam(net)
+criterrion = losses.CrossEntropy()
+optimizer = optims.SGD(net)
 gen_train = Gen(X_train, Y_train)
-gen_test = Gen(X_test, Y_test)
+gen_test = Gen(X_train, Y_train)
 
-epochs = 1
+epochs = 20
 batch_size = 32
 
 for i in range(epochs):
@@ -92,8 +109,9 @@ for i in range(epochs):
     for j in range(len(gen_train)):
         X, Y = gen_train.next_batch(j)
         netout = net(X)
-        loss = criterrion(netout)
-        print("train loss: ", loss)
+        loss = criterrion(netout, Y)
+        if j % 10 == 0:
+            print("train batch %d losses:" % j, loss)
         da = criterrion.backwards()
         net.backwards(da)
         optimizer.step()
@@ -105,7 +123,9 @@ for i in range(epochs):
     for k in range(len(gen_test)):
         X, Y = gen_test.next_batch(k)
         netout = net(X, run=True)
-        Y_pred = np.expand_dims(np.argmax(netout, axis=1))
-        right = Y_pred == Y
+        Y_pred = np.expand_dims(np.argmax(netout, axis=1), axis=-1)
+        Y_pred = np.squeeze(Y_pred)
+        y_list = np.argmax(Y, axis=-1)
+        right = Y_pred == y_list
         num_right += np.sum(right.astype(np.int))
-    print("accuracy: ", num_right / (100 * num_total), "%")
+    print("accuracy: ", num_right / num_total)
