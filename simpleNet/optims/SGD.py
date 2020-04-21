@@ -7,28 +7,23 @@
 from simpleNet.layers import Layer
 from simpleNet import Moduel
 
+
 class SGD:
-    def __init__(self, model:Layer, lr:float=0.001):
+
+    def __init__(self, model: Layer, lr: float=0.0001):
         self.model = model
         self.lr = lr
 
-    def step(self):
-
-        def step_layer(layer):
-            for i in range(len(layer.cached_grad)):
-                grad = layer.cached_grad[i]
-                layer.weights[i] -= self.lr * grad
-
-        def step_moduel(moduel):
-
-            for layer in moduel.layers:
-                if isinstance(layer, Moduel):
-                    step_moduel(layer)
-                else:
-                    step_layer(layer)
-
-        if isinstance(self.model, Moduel):
-            step_moduel(self.model)
+    def _step(self, layer):
+        if isinstance(layer, Moduel):
+            for sub_layer in layer.layers:
+                self._step(sub_layer)
         else:
-            step_layer(self.model)
+            for key in layer.weights:
+                grad = layer.cached_grad[key]
+                layer.weights[key] -= self.lr * grad
+
+    def step(self):
+        self._step(self.model)
+
 

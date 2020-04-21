@@ -14,55 +14,23 @@ class Net(Moduel):
     def __init__(self):
         super().__init__()
 
-        self.conv1 = layers.Conv2D(1, 32, 3, padding='same')
+        self.conv1 = layers.Conv2D(1, 16, 3, padding='same')
         self.relu1 = layers.Relu()
         self.pool1 = layers.MaxPooling2D(2)
 
-        self.conv2 = layers.Conv2D(32, 64, 3, padding='same')
+        self.conv2 = layers.Conv2D(16, 32, 3, padding='same')
         self.relu2 = layers.Relu()
         self.pool2 = layers.MaxPooling2D(2)
 
         self.dropout1 = layers.Dropout(0.25)
         self.flatten = layers.Flatten()
 
-        self.dense1 = layers.Dense(3136, 128)
+        self.dense1 = layers.Dense(32*7*7, 128)
         self.relu3 = layers.Relu()
         self.dropout2 = layers.Dropout(0.5)
 
         self.dense2 = layers.Dense(128, 10)
         self.softmax = layers.Softmax()
-
-    def forwards(self, x):
-        x = self.conv1(x)
-        x = self.relu1(x)
-        x = self.pool1(x)
-        x = self.conv2(x)
-        x = self.relu2(x)
-        x = self.pool2(x)
-        x = self.dropout1(x)
-        x = self.flatten(x)
-        x = self.dense1(x)
-        x = self.relu3(x)
-        x = self.dropout2(x)
-        x = self.dense2(x)
-        x = self.softmax(x)
-        return x
-
-    def backwards(self, da):
-        da0 = self.softmax.backwards(da)
-        da1 = self.dense2.backwards(da0)
-        da2 = self.dropout2.backwards(da1)
-        da3 = self.relu3.backwards(da2)
-        da4 = self.dense1.backwards(da3)
-        da5 = self.flatten.backwards(da4)
-        da6 = self.dropout1.backwards(da5)
-        da7 = self.pool2.backwards(da6)
-        da8 = self.relu2.backwards(da7)
-        da9 = self.conv2.backwards(da8)
-        da10 = self.pool1.backwards(da9)
-        da11 = self.relu1.backwards(da10)
-        da12 = self.conv1.backwards(da11)
-        return da12
 
 # 数据gen
 class Gen:
@@ -106,7 +74,7 @@ net = Net()
 net.summary()
 
 criterrion = losses.CrossEntropy()
-optimizer = optims.SGD(net)
+optimizer = optims.Adam(net)
 gen_train = Gen(X_train, Y_train)
 gen_test = Gen(X_train, Y_train)
 

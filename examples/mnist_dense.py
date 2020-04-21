@@ -110,7 +110,7 @@ for i in range(epochs):
         X, Y = gen_train.next_batch(j)
         netout = net(X)
         loss = criterrion(netout, Y)
-        if j % 10 == 0:
+        if j % 100 == 0:
             print("train batch %d losses:" % j, loss)
         da = criterrion.backwards()
         net.backwards(da)
