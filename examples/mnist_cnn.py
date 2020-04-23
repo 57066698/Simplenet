@@ -73,7 +73,7 @@ class Gen:
 net = Net()
 net.summary()
 
-criterrion = losses.CrossEntropy()
+criterrion = losses.CategoricalCrossEntropy()
 optimizer = optims.Adam(net)
 gen_train = Gen(X_train, Y_train)
 gen_test = Gen(X_train, Y_train)

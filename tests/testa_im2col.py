@@ -1,5 +1,5 @@
 import numpy as np
-from simpleNet.utils.im2col_tool import im2col, col2im
+from simpleNet.utils.im2col_tool import im2col
 
 a = np.arange(2 * 2 * 3 * 3)
 a = np.reshape(a, (2, 2, 3, 3))

@@ -3,7 +3,7 @@ from simpleNet import layers
 from simpleNet.layers.other_conv2d import Conv2d_other
 
 
-conv = layers.Conv2D(2, 3, 2, padding="valid", bias=False)
+conv = Conv2d_other(2, 3, 2, padding=0)
 x = np.random.rand(10, 2, 2, 2).astype(np.float64)
 epsilon = 1e-7
 
@@ -28,20 +28,22 @@ grad = conv.cached_grad["w"].copy()
 w = np.copy(conv.weights["w"])
 gradapprox = np.zeros(w.shape, dtype=np.float64)
 
-_, W, H = w.shape
+OC, IC, H, W = w.shape
 
-for i in range(W):
-    for j in range(H):
-        # weight + - ，再算 J- J+
-        conv.weights["w"][0, i, j] += epsilon
-        z = conv(x)
-        J_plus = my_loss(z)
-        conv.weights["w"][0, i, j] -= 2*epsilon
-        z = conv(x)
-        J_minus = my_loss(z)
+for oc in range(OC):
+    for ic in range(IC):
+        for i in range(H):
+            for j in range(W):
+                # weight + - ，再算 J- J+
+                conv.weights["w"][oc, ic, i, j] += epsilon
+                z = conv(x)
+                J_plus = my_loss(z)
+                conv.weights["w"][oc, ic, i, j] -= 2*epsilon
+                z = conv(x)
+                J_minus = my_loss(z)
 
-        gradapprox[0, i, j] = (J_plus - J_minus) / (2 * epsilon)
-        conv.weights["w"][0, i, j] += epsilon
+                gradapprox[oc, ic, i, j] = (J_plus - J_minus) / (2 * epsilon)
+                conv.weights["w"][oc, ic, i, j] += epsilon
 
 # gradapprox /= 12
 # 结果

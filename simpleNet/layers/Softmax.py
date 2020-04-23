@@ -8,8 +8,7 @@ class Softmax(Layer):
         super().__init__()
         self.name = Softmax
 
-    def __call__(self, *args, **kwargs):
-        x = args[0]
+    def __call__(self, x):
         exp_x = np.exp(x - np.max(x, axis=1, keepdims=True))
         out = exp_x / np.sum(exp_x, axis=1, keepdims=True)
         return out

@@ -1,7 +1,10 @@
 import numpy as np
+"""
+    categorical cross entropy
+    反向传播是和 softmax 联立的，不能单独使用
+"""
 
-
-class CrossEntropy:
+class CategoricalCrossEntropy:
 
     def __init__(self):
         self.last_y_true = None

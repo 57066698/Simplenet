@@ -1,6 +1,35 @@
 import numpy as np
 
 
+def cal_padding_value(x_shape, kernel_size:tuple, stride_size:tuple, padding:str= "valid"):
+    """
+    从输入尺寸，核尺寸，和步长计算pad值和输出尺寸
+    :param x_shape:
+    :param kernel_size:
+    :param stride_size:
+    :param padding:
+    :return:
+    """
+
+    N, in_channels, in_h, in_w = x_shape
+    kernel_h, kernel_w = kernel_size
+    stride_h, stride_w = stride_size
+
+    assert padding in ["valid", "same"]
+    if padding == "valid":
+        out_h = int((in_h - kernel_h + 1) / stride_h)
+        out_w = int((in_h - kernel_w + 1) / stride_w)
+        padding_value = 0
+    else:  # padding = same
+        out_h = int(np.ceil(in_h / stride_h))
+        out_w = int(np.ceil(in_w / stride_w))
+        in_pad_h = (out_h - 1) * stride_h + kernel_h
+        in_pad_w = (out_w - 1) * stride_w + kernel_w
+        padding_value = (in_pad_h - in_h, in_pad_w - in_w)
+
+    return padding_value, (out_h, out_w)
+
+
 def padding_2d(x, value):
     """
     优先pad 左和上
@@ -20,20 +49,7 @@ def padding_2d(x, value):
     elif len(value) == 4:
         top, bottom, left, right = value
 
-    N, C, H, W = x.shape
-
-    if top > 0:
-        top_pad = np.zeros((N, C, top, W), dtype=np.float32)
-        x = np.concatenate((top_pad, x), axis=2)
-    if bottom > 0:
-        bottom_pad = np.zeros((N, C, bottom, W), dtype=np.float32)
-        x = np.concatenate((x, bottom_pad), axis=2)
-    if left > 0:
-        left_pad = np.zeros((N, C, H + top + bottom, left), dtype=np.float32)
-        x = np.concatenate((left_pad, x), axis=3)
-    if right > 0:
-        right_pad = np.zeros((N, C, H + top + bottom, right), dtype=np.float32)
-        x = np.concatenate((x, right_pad), axis=3)
+    x = np.pad(x, [(0, 0), (0, 0), (top, bottom), (left, right)], mode='constant')
 
     return x
 
