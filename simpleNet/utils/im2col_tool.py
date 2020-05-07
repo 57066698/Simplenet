@@ -7,8 +7,7 @@ def im2col(input_data, kernel_h, kernel_w, stride_h, stride_w):
     """
     # 检查和参数
     N, in_channel, H, W = input_data.shape
-    out_h, out_w = int(H - (kernel_h-1) / stride_h), int(W - (kernel_w-1) / stride_w)
-    assert out_h % 1 == 0 and out_w % 1 == 0
+    out_h, out_w = np.ceil((H - (kernel_h-1)) / stride_h), np.ceil((W - (kernel_w-1)) / stride_w)
     out_h = int(out_h)
     out_w = int(out_w)
 
@@ -24,6 +23,9 @@ def im2col(input_data, kernel_h, kernel_w, stride_h, stride_w):
             col[:, block_i * out_w + block_j] = block_data
 
     return col
+
+
+
 
 
 def col_out2im(col_out, N, out_h, out_w, out_channel):

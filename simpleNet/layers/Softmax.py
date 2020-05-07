@@ -6,7 +6,7 @@ class Softmax(Layer):
 
     def __init__(self):
         super().__init__()
-        self.name = Softmax
+        self.name = "Softmax"
 
     def __call__(self, x):
         exp_x = np.exp(x - np.max(x, axis=1, keepdims=True))

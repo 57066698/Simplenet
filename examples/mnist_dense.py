@@ -96,6 +96,7 @@ class Gen:
 # train
 
 net = Net()
+
 criterrion = losses.CategoricalCrossEntropy()
 optimizer = optims.SGD(net)
 gen_train = Gen(X_train, Y_train)
@@ -117,6 +118,8 @@ for i in range(epochs):
         optimizer.step()
     gen_train.end_epoch()
 
+    np.savez("111.npz", net.weights)
+
     # val
     num_right = 0
     num_total = gen_test.totol_num()
@@ -129,3 +132,20 @@ for i in range(epochs):
         right = Y_pred == y_list
         num_right += np.sum(right.astype(np.int))
     print("accuracy: ", num_right / num_total)
+
+# net2 = Net()
+# db = np.load("111.npz")
+# net2.set_weights(db['arr_0'])
+#
+# # val
+# num_right = 0
+# num_total = gen_test.totol_num()
+# for k in range(len(gen_test)):
+#     X, Y = gen_test.next_batch(k)
+#     netout = net2(X, run=True)
+#     Y_pred = np.expand_dims(np.argmax(netout, axis=1), axis=-1)
+#     Y_pred = np.squeeze(Y_pred)
+#     y_list = np.argmax(Y, axis=-1)
+#     right = Y_pred == y_list
+#     num_right += np.sum(right.astype(np.int))
+# print("accuracy: ", num_right / num_total)

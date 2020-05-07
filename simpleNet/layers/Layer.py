@@ -1,22 +1,21 @@
 class Layer:
     def __init__(self):
         # 和正反传播相关的必备参数和缓存
-        self.weights = []
-        self.cached_grad = []
-        self.statu = "train"
+        self.weights = {}
+        self.cached_grad = {}
+        self._mode = "train"
         self.name = ""
+
+    @property
+    def mode(self):
+        return self._mode
+
+    @mode.setter
+    def mode(self, value):
+        self._mode = value
 
     def backwards(self, da):
         raise NotImplementedError()
-
-    def change_state(self, statu):
-        if self.statu == statu:
-            return
-        assert statu in ["train", "run"]
-        self.statu = statu
-
-    def __repr__(self):
-        print(self.__str__())
 
     def __str__(self):
         raise NotImplementedError()

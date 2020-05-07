@@ -1,8 +1,10 @@
 import numpy as np
+
 """
     categorical cross entropy
     反向传播是和 softmax 联立的，不能单独使用
 """
+
 
 class CategoricalCrossEntropy:
 
@@ -15,8 +17,7 @@ class CategoricalCrossEntropy:
         self.last_y_true = args[1]
         epsilon = 1e-12
         predictions = np.clip(self.last_y_pred, epsilon, 1. - epsilon)
-        N = predictions.shape[0]
-        ce = -np.sum(self.last_y_true * np.log(predictions + 1e-9)) / N
+        ce = -np.sum(self.last_y_true * np.log(predictions)) / predictions.shape[0]
         return ce
 
     def backwards(self):

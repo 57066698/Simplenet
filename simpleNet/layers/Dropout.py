@@ -10,7 +10,7 @@ class Dropout(Layer):
 
     def __call__(self, *args, **kwargs):
 
-        if self.statu == "run":
+        if self.mode == "test":
             return args[0]
 
         x = args[0]

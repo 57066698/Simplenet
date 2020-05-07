@@ -2,7 +2,7 @@ import numpy as np
 from simpleNet import layers, losses
 
 
-conv = layers.Dense(2, 3, use_bias=False)
+conv = layers.Dense(2, 3, bias=False)
 x = np.random.rand(5, 2) #.astype(np.float64)
 y = np.random.rand(5, 3) #.astype(np.float64)
 N = x.shape[0]
