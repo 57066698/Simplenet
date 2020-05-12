@@ -1,7 +1,9 @@
 import numpy as np
-from simpleNet import layers, Moduel, optims, losses
+from simpleNet import layers, Moduel, optims, losses, init
 import matplotlib.pyplot as plt
-
+"""
+    AC_Gan 论文实现
+"""
 
 # model
 class Generator(Moduel):
@@ -86,12 +88,12 @@ class Discriminator(Moduel):
 
         # x [N, 128 * 7 * 7]
         self.out_1 = Moduel([
-            layers.Dense(128*7*7, 1),
+            layers.Dense(128 * 7 * 7, 1),
             layers.Sigmoid()
         ])
 
         self.out2 = Moduel([
-            layers.Dense(128*7*7, 10),
+            layers.Dense(128 * 7 * 7, 10),
             layers.Softmax()
         ])
 
@@ -105,10 +107,11 @@ class Discriminator(Moduel):
     def backwards(self, dture_false, dclas):
         dture_false = self.out_1.backwards(dture_false)
         # dclas = self.out2.backwards(dclas)
-        dx = dture_false # + dclas
+        dx = dture_false  # + dclas
         dx = self.flatten.backwards(dx)
         dx = self.convs.backwards(dx)
         return dx
+
 
 # data and gen
 # db = np.load("./datasets/fmnist.npz")
@@ -117,8 +120,6 @@ class Discriminator(Moduel):
 from examples.datasets.mnist_loader import load_train, load_test
 
 x_train, y_train = load_train()
-
-
 
 
 # 数据gen
@@ -145,7 +146,7 @@ class RealGen:
 
     def __len__(self):
         import math
-        return math.floor(self.inds.shape[0] / self.batch_size)  #避免少出
+        return math.floor(self.inds.shape[0] / self.batch_size)  # 避免少出
 
     def end_epoch(self):
         np.random.shuffle(self.inds)
@@ -153,11 +154,13 @@ class RealGen:
     def totol_num(self):
         return self.inds.shape[0]
 
+
 def one_hot(x):
     x = x.astype(np.int)
     onehot = np.zeros((x.size, 10))
     onehot[np.arange(x.size), x] = 1
     return onehot
+
 
 # show
 def show_imgs(imgs, batch=0):
@@ -182,6 +185,8 @@ n_class = 10
 
 generator = Generator(latent_dim, n_class)
 discriminator = Discriminator()
+init.Normal_(generator, 0, 0.2, "w")  # 对所有名字含w的weight重新初始化
+init.Normal_(discriminator, 0, 0.2, "w")
 generator.summary()
 discriminator.summary()
 half_batch = int(batch_size / 2)
@@ -190,7 +195,6 @@ loss_real = losses.BinaryCrossEntropy()
 loss_cls = losses.CategoricalCrossEntropy()
 optim_g = optims.Adam(generator, lr=0.0002, fy1=0.5)
 optim_d = optims.Adam(discriminator, lr=0.0002, fy1=0.5)
-
 
 
 def latent_gen(batch_size, latent_dim=100, n_class=10):

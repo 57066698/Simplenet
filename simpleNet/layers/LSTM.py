@@ -21,16 +21,20 @@ import numpy as np
 
 
 class LSTM(Layer):
-    def __init__(self, input_size, hidden_size):
+    def __init__(self, input_size, hidden_size, return_sequence:bool = False, return_state:bool = False):
         super().__init__()
         self.name = "LSTM"
 
         self.input_size = input_size
         self.hidden_size = hidden_size
+        self.return_sequence = return_sequence
+        self.return_state = return_state
 
-        wx = np.random.rand(input_size, 4 * hidden_size) # in, f, q, g 顺序 4 个门
-        wh = np.random.rand(hidden_size, 4 * hidden_size)
-        b = np.random.rand(4 * hidden_size)
+        # torch 初始化 U(-(1/hidden)**0.5, sqrt(1/hidden)**0.5)
+        low, high = - (1/hidden_size) ** 0.5, (1/hidden_size) ** 0.5
+        wx = np.random.uniform(low, high, (input_size, 4 * hidden_size))  # in, forgot, quit, g 顺序 4 个门
+        wh = np.random.uniform(low, high, (input_size, 4 * hidden_size))
+        b = np.random.uniform(low, high, (4 * hidden_size))
 
         S0 = np.zeros(hidden_size)
         H0 = np.zeros(hidden_size)
@@ -60,6 +64,11 @@ class LSTM(Layer):
             S[:, i, :], H[:, i, :], caches[i] = self.step_forward(x[:, i, :], S[:, i-1, :], H[:, i-1, :], wx, wh, b)
 
         self.caches = caches
+
+        return_H = H if self.return_sequence else H[:, -1, :]
+        if self.return_state:
+            return return_H, H[:, -1, :]
+
         return H
 
     def step_forward(self, x, s_prev, h_prev, wx, wh, b):
