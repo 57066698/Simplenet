@@ -33,6 +33,17 @@ class Moduel(Layer):
                     layer.weights = value[layer_name]
 
     @property
+    def grad(self):
+        dic = {}
+        for layer in self.layers:
+            dic[layer.name] = layer.grad
+        return dic
+
+    @grad.setter
+    def grad(self, value):
+        raise NotImplementedError()
+
+    @property
     def mode(self):
         return self._mode
 

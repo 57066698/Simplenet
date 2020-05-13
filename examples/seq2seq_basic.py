@@ -1,3 +1,18 @@
+"""
+    keras 的 s2s 模型实现本地化
+    model:  [N, len, char_eng]
+            -> LSTM(latent)
+            -> [N, len, latent], [N, latent], [N, latent] (输出序列，最后单元H, 最后单元S)
+                                 -> and [N, len, char_fra]
+                                 -> LSTM(latent)
+                                 -> [N, len, latent], _, _
+                                 -> Dense("softmax")
+
+    train:  input_text -> encode_input[t]
+            target_text -> decode_input[t]
+                        -> decode_target[t-1]
+
+"""
 
 import numpy as np
 from simpleNet import Moduel, losses, layers, optims
@@ -8,7 +23,7 @@ batch_size = 64
 epochs = 5
 latent_dim = 256
 num_samples = 10000
-data_path = 'examples/datasets/fra.txt'
+data_path = 'datasets/fra.txt'
 
 # handle data
 
@@ -144,9 +159,21 @@ class TrainModel(Moduel):
 net = TrainModel()
 net.summary()
 dataGen = Gen(encoder_input_data, decoder_input_data, decoder_target_data, batch_size)
+loss = losses.CategoricalCrossEntropy()
+optim = optims.RMSProp(net)
 
-(x1, x2), y = dataGen.next_batch(0)
+for i in range(epochs):
+    for j in range(len(dataGen)):
 
-from simpleNet.utils.grad_check import grad_check_one
+        (x1, x2), y_true = dataGen.next_batch(j)
+        y_pred = net(x1, x2)
+        l = loss(y_pred, y_true)
+        da = loss.backwards()
+        net.backwards(da)
+        optim.step()
 
-grad_check_one(net, (x1, x2))
+        if j % 10 == 0:
+            print("epoch%d %d/%d:, loss %.02f" % (i, j, len(dataGen), l))
+
+# use
+

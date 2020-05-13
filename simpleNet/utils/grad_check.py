@@ -2,24 +2,28 @@ import numpy as np
 from simpleNet.layers.Layer import Layer
 from simpleNet import Moduel
 
-def grad_check(layer:Layer, x):
+
+def grad_check(layer: Layer, inputs, start=0):
     """
-    梯度检查, 输入layer和对应的输入 x, 测试中会将所有输入，参数都转化为float64进行
-    :param layer:
-    :param x: numpy array
+    梯度检查
+    :param layer: 目标
+    :param inputs: layer的输入, 单个或tuple
+    :param start: 从第几个weight开始，顺序是深度优先
     :return:
     """
     epsilon = 1e-7
 
-    x = x.astype(np.float64)
+    X = []
+
+    if isinstance(inputs, tuple):
+        for x in inputs:
+            X.append(x.astype(np.float64))
+    else:
+        X.append(inputs.astype(np.float64))
+    X = tuple(X)
+
     change_all_weights(layer)
-
-    def loss(y_pred):
-        return np.sum(y_pred) / y_pred.shape[0]
-    def loss_back(y_pred):
-        return np.ones_like(y_pred) / y_pred.shape[0]
-
-    y_pred = layer(x)
+    y_pred = layer(*X)
     layer.backwards(loss_back(y_pred))
 
     N, weights, grads = fetch_all_weights(layer)
@@ -29,9 +33,9 @@ def grad_check(layer:Layer, x):
 
     for i in range(N):
         change_by_total_index(weights, i, epsilon)
-        J_plus = loss(layer(x))
+        J_plus = loss(layer(*X))
         change_by_total_index(weights, i, - 2 * epsilon)
-        J_minus = loss(layer(x))
+        J_minus = loss(layer(*X))
         change_by_total_index(weights, i, epsilon)
 
         gradapprox_1d[i] = (J_plus - J_minus) / (2 * epsilon)
@@ -58,7 +62,23 @@ def change_all_weights(layer):
         for l in layer.layers:
             change_all_weights(l)
 
+def _dic2list(dic):
+    """
+    将weights dic 和 grad dic 转化为 list
+    :param dic
+    :return:
+    """
+    lst = []
 
+    for key in dic:
+        item = dic[key]
+        if isinstance(item, dict):
+            sub_list = _dic2list(item)
+            for sub_item in sub_list:
+                sub_item['path'] = key + "/" + sub_item['path']
+        else:
+            lst.append({'path':key, 'data':item})
+    return lst
 
 def fetch_all_weights(layer):
     N = 0
@@ -131,3 +151,8 @@ def change_by_total_index(lst_ndarray, index, value):
             checked_num += num
 
     lst_ndarray[ndarray_ind][tuple(shape_ind)] += value
+
+def loss(y_pred):
+    return np.sum(y_pred) / y_pred.shape[0]
+def loss_back(y_pred):
+    return np.ones_like(y_pred) / y_pred.shape[0]

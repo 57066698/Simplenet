@@ -49,7 +49,7 @@ loss = losses.MeanSquaredError()
 optimizer = optims.Adam(net)
 
 # train
-for i in range(1000):
+for i in range(3000):
     X, Y = gen(10, 0.5, 20)
     y_pred = net(X)
     l = loss(y_pred, Y)

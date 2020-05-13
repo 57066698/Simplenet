@@ -98,7 +98,7 @@ class Gen:
 net = Net()
 
 criterrion = losses.CategoricalCrossEntropy()
-optimizer = optims.SGD(net)
+optimizer = optims.RMSProp(net)
 gen_train = Gen(X_train, Y_train)
 gen_test = Gen(X_train, Y_train)
 

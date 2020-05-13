@@ -33,7 +33,7 @@ class LSTM(Layer):
         # torch 初始化 U(-(1/hidden)**0.5, sqrt(1/hidden)**0.5)
         low, high = - (1/hidden_size) ** 0.5, (1/hidden_size) ** 0.5
         wx = np.random.uniform(low, high, (input_size, 4 * hidden_size))  # in, forgot, quit, g 顺序 4 个门
-        wh = np.random.uniform(low, high, (input_size, 4 * hidden_size))
+        wh = np.random.uniform(low, high, (hidden_size, 4 * hidden_size))
         b = np.random.uniform(low, high, (4 * hidden_size))
 
         S0 = np.zeros(hidden_size)
@@ -41,7 +41,7 @@ class LSTM(Layer):
 
         self.weights = {"wx": wx, "wh": wh, "b": b, "S0": S0, "H0": H0}
 
-    def __call__(self, x):
+    def __call__(self, x, init: tuple = None):
         """
         输出等长度的y
         :param x:
@@ -50,7 +50,12 @@ class LSTM(Layer):
         N, length, x_dim = x.shape
         input_size, hidden_size = self.input_size, self.hidden_size
         wx, wh, b = self.weights["wx"], self.weights["wh"], self.weights["b"]
-        S0, H0 = self.weights["S0"], self.weights["H0"]
+        if init:
+            assert init[0].shape == (N, hidden_size)
+            assert init[1].shape == (N, hidden_size)
+            S0, H0 = init
+        else:
+            S0, H0 = self.weights["S0"], self.weights["H0"]
 
         assert input_size == x_dim
 
@@ -64,12 +69,9 @@ class LSTM(Layer):
             S[:, i, :], H[:, i, :], caches[i] = self.step_forward(x[:, i, :], S[:, i-1, :], H[:, i-1, :], wx, wh, b)
 
         self.caches = caches
+        self.cached_hShape = H.shape
 
-        return_H = H if self.return_sequence else H[:, -1, :]
-        if self.return_state:
-            return return_H, H[:, -1, :]
-
-        return H
+        return H, (H[:, -1, :], S[:, -1, :])
 
     def step_forward(self, x, s_prev, h_prev, wx, wh, b):
         """
@@ -151,12 +153,23 @@ class LSTM(Layer):
 
         return dx, ds_prev, dh_prev, dwx, dwh, db
 
-    def backwards(self, da):
-        N, length, out_size = da.shape
+    def backwards(self, da, dhds=None):
         caches, input_size, hidden_size = self.caches, self.input_size, self.hidden_size
+        N, length, out_size = self.cached_hShape
 
-        assert out_size == hidden_size
-        assert N, length == self.length
+        if da is None:
+            da = np.zeros((N, length, out_size))
+            assert dhds and len(dhds) == 2
+        else:
+            assert da.shape == self.cached_hShape
+
+        if dhds:
+            dh_prev_, ds_prev_ = dhds
+            assert dh_prev_.shape == (N, hidden_size)
+            assert ds_prev_.shape == (N, hidden_size)
+        else:
+            ds_prev_ = np.zeros((N, hidden_size))
+            dh_prev_ = np.zeros((N, hidden_size))
 
         dx = np.zeros((N, length, input_size))
         dS = np.zeros((N, length, hidden_size))
@@ -165,11 +178,7 @@ class LSTM(Layer):
         dwh = np.zeros((hidden_size, 4*hidden_size))
         db = np.zeros(4*hidden_size)
 
-        ds_prev_ = np.zeros((N, hidden_size))
-        dh_prev_ = np.zeros((N, hidden_size))
-
         for i in reversed(range(length)):
-            # todo: lstm
             dS[:, i, :] += ds_prev_
             dH[:, i, :] += dh_prev_
             dx_, ds_prev_, dh_prev_, dwx_, dwh_, db_ = self.step_backward(dS[:, i, :], dH[:, i, :], caches[i])
@@ -183,7 +192,7 @@ class LSTM(Layer):
         dH0 = np.sum(dh_prev_, axis=0)
 
         self.cached_grad = {"b": db, "wx": dwx, "wh": dwh, "S0": dS0, "H0": dH0}
-        return dx
+        return dx, (dh_prev_, ds_prev_)
 
-    def __repr__(self):
+    def __str__(self):
         return "%s : input_size: %s, hidden_size: %s" % (self.name, str(self.input_size), str(self.hidden_size))
