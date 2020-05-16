@@ -74,7 +74,7 @@ net = Net()
 net.summary()
 
 criterrion = losses.CategoricalCrossEntropy()
-optimizer = optims.Adam(net)
+optimizer = optims.RMSProp(net)
 gen_train = Gen(X_train, Y_train)
 gen_test = Gen(X_train, Y_train)
 

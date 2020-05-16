@@ -3,64 +3,112 @@ from simpleNet.layers.Layer import Layer
 from simpleNet import Moduel
 
 
-def grad_check(layer: Layer, inputs, start=0):
+def grad_check(layer: Layer, inputs, start=0, loss=None):
     """
     梯度检查
     :param layer: 目标
     :param inputs: layer的输入, 单个或tuple
     :param start: 从第几个weight开始，顺序是深度优先
+    :param check_inputs: 是否检查inputs，需要layer可以返回全部inputs的偏导
     :return:
     """
     epsilon = 1e-7
 
+    if loss is None:
+        loss = My_loss()
+
     X = []
 
-    if isinstance(inputs, tuple):
-        for x in inputs:
-            X.append(x.astype(np.float64))
-    else:
-        X.append(inputs.astype(np.float64))
+    for i, x in enumerate(tuple2list(inputs)):
+        X.append(x.astype(np.float64))
     X = tuple(X)
 
     change_all_weights(layer)
     y_pred = layer(*X)
-    layer.backwards(loss_back(y_pred))
+    layer.backwards(loss.backwards(y_pred))
 
-    N, weights, grads = fetch_all_weights(layer)
+    # weights 和 grads 的 list
+    weight_dic = layer.weights
+    grad_dic = layer.grads
+    weight_list = _dic2list(weight_dic)
+    grad_list = _dic2list(grad_dic)
 
-    grads_1d = np.array(grads).reshape((-1))
-    gradapprox_1d = np.zeros(N)
+    def get_grad(path, grad_list):
+        for grad in grad_list:
+            if grad['path'] == path:
+                return grad['data']
+        return None
 
-    for i in range(N):
-        change_by_total_index(weights, i, epsilon)
-        J_plus = loss(layer(*X))
-        change_by_total_index(weights, i, - 2 * epsilon)
-        J_minus = loss(layer(*X))
-        change_by_total_index(weights, i, epsilon)
+    total_grad_1d = None
+    total_gradapprox_1d = None
 
-        gradapprox_1d[i] = (J_plus - J_minus) / (2 * epsilon)
+    # 逐个weight处理, 对每个weight取前100个
+    for i in range(start, len(weight_list), 1):
+        path = weight_list[i]['path']
+        weight = weight_list[i]['data']
+        grad = get_grad(path, grad_list)
+        if grad is None:
+            continue
 
-        if i % 1000 == 0:
-            print(i)
+        weight_num = np.prod(weight.shape)
+        use_num = min(weight_num, 10)
 
-    numerator = np.linalg.norm(grads_1d - gradapprox_1d)
-    denominator = np.linalg.norm(gradapprox_1d) + np.linalg.norm(grads_1d)
+        grads_1d = np.reshape(grad, (-1))[:use_num]
+        gradapprox_1d = np.zeros(use_num)
+
+        for j in range(use_num):
+            ind = get_shape_ind(weight.shape, j)
+            weight[ind] += epsilon
+            J_plus = loss(layer(*X))
+            weight[ind] -= 2 * epsilon
+            J_minus = loss(layer(*X))
+            weight[ind] += epsilon
+            gradapprox_1d[j] = (J_plus - J_minus) / (2 * epsilon)
+
+        if total_grad_1d is None:
+            total_grad_1d = grads_1d
+            total_gradapprox_1d = gradapprox_1d
+        else:
+            total_grad_1d = np.concatenate((total_grad_1d, grads_1d), axis=0)
+            total_gradapprox_1d = np.concatenate((total_gradapprox_1d, gradapprox_1d), axis=0)
+        numerator = np.linalg.norm(grads_1d - gradapprox_1d)
+        denominator = np.linalg.norm(gradapprox_1d) + np.linalg.norm(grads_1d)
+        diff = numerator / denominator
+
+        print("")
+        print("%d/%d %s: %.08f ------------------" % (i, len(weight_list), path, diff))
+        print(grads_1d)
+        print(gradapprox_1d)
+
+    numerator = np.linalg.norm(total_grad_1d - total_gradapprox_1d)
+    denominator = np.linalg.norm(total_gradapprox_1d) + np.linalg.norm(total_grad_1d)
     diff = numerator / denominator
 
-    print(diff)
+    print("")
+    print("total: %.08f" % diff)
 
-    print(grads_1d)
-    print(gradapprox_1d)
+
+def tuple2list(t):
+    if isinstance(t, tuple):
+        lst = []
+        for item in t:
+            if isinstance(item, tuple):
+                lst += tuple2list(item)
+            else:
+                lst.append(item)
+        return lst
+    else:
+        return [t]
 
 
 def change_all_weights(layer):
-
     if not isinstance(layer, Moduel):
         for key in layer.weights:
             layer.weights[key] = layer.weights[key].astype(np.float64)
     else:
         for l in layer.layers:
             change_all_weights(l)
+
 
 def _dic2list(dic):
     """
@@ -76,83 +124,44 @@ def _dic2list(dic):
             sub_list = _dic2list(item)
             for sub_item in sub_list:
                 sub_item['path'] = key + "/" + sub_item['path']
+            lst += sub_list
         else:
-            lst.append({'path':key, 'data':item})
+            lst.append({'path': key, 'data': item})
     return lst
 
-def fetch_all_weights(layer):
-    N = 0
-    weights = []
-    grads = []
 
-    if isinstance(layer, Moduel):
-        for l in layer.layers:
-            sub_N, sub_weights, sub_grads = fetch_all_weights(l)
-            N += sub_N
-            weights = weights + sub_weights
-            grads = grads + sub_grads
-    else:
-        for key in layer.cached_grad:
-            value = layer.cached_grad[key]
-            grads = grads + np.reshape(value, (-1)).tolist()
-            weights.append(layer.weights[key])
-            N += np.reshape(value, (-1)).shape[0]
-
-    return N, weights, grads
-
-
-def change_by_total_index(lst_ndarray, index, value):
+def get_shape_ind(shape, n):
     """
-    按照总index 序号， 修改lst_darray中的值
-    :param lst_ndarray: [ndarray, ndarray, ...]
-    :param index:
-    :param value:
-    :return:
+    获得从shape中第n个index tuple
+    :param shape: np shape
+    :param n: int
+    :return: (d1, d2, ... )
     """
+    nums = []
+    muti = 1
+    for i in range(len(shape) - 1, -1, -1):
+        muti = muti * shape[i]
+        nums.append(muti)
+    nums = nums[::-1]
+    nums.append(1)
 
-    def find_args(shape, index):
-        """
-        从 shape 中找到总第index个的的具体位置，没有就返回-1, 同时返回总数量
-        :param shape:
-        :param index:
-        :return:
-        """
-        nums = []
-        muti = 1
-        for i in range(len(shape)-1, -1, -1):
-            muti = muti * shape[i]
-            nums.append(muti)
-        nums = nums[::-1]
-        nums.append(1)
+    if n > nums[0] - 1:
+        return -1
 
-        if index > nums[0] - 1:
-            return -1, nums[0]
+    inds = []
+    remain = n
+    for i in range(len(shape)):
+        ind = remain // nums[i + 1]
+        remain = remain % nums[i + 1]
+        inds.append(ind)
 
-        inds = []
-        remain = index
-        for i in range(len(shape)):
-            ind = remain//nums[i+1]
-            remain = remain%nums[i+1]
-            inds.append(ind)
+    return tuple(inds)
 
-        return inds, nums[0]
 
-    checked_num = 0
-    ndarray_ind = 0
-    shape_ind = None
-    for i in range(len(lst_ndarray)):
-        shape = lst_ndarray[i].shape
-        ind, num = find_args(shape, index-checked_num)
-        if ind != -1:
-            shape_ind = ind
-            ndarray_ind = i
-            break
-        else:
-            checked_num += num
+class My_loss:
 
-    lst_ndarray[ndarray_ind][tuple(shape_ind)] += value
+    def __call__(self, y_pred, y_true=None):
+        return np.sum(y_pred) / y_pred.shape[0]
 
-def loss(y_pred):
-    return np.sum(y_pred) / y_pred.shape[0]
-def loss_back(y_pred):
-    return np.ones_like(y_pred) / y_pred.shape[0]
+    def backwards(self, y_pred, y_true=None):
+        return np.ones_like(y_pred) / y_pred.shape[0]

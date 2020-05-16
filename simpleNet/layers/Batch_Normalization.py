@@ -20,6 +20,12 @@ import numpy as np
 
 class Batch_Normalization(Layer):
     def __init__(self, axis=1, momentum=0.99, epsilon=0.001):
+        """
+        将batch 和 非 C 通道的数据空间拉平
+        :param axis: C 通道位置
+        :param momentum:
+        :param epsilon:
+        """
         super().__init__()
         self.name = "Batch_Normalization"
         self.axis = axis

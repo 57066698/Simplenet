@@ -12,13 +12,13 @@ class CategoricalCrossEntropy:
         self.last_y_true = None
         self.last_y_pred = None
 
-    def __call__(self, *args, **kwargs):
-        self.last_y_pred = args[0]
-        self.last_y_true = args[1]
+    def __call__(self, y_pred, y_true):
+        self.last_y_pred = y_pred
+        self.last_y_true = y_true
         epsilon = 1e-12
         predictions = np.clip(self.last_y_pred, epsilon, 1. - epsilon)
-        ce = -np.sum(self.last_y_true * np.log(predictions)) / predictions.shape[0]
+        ce = -np.sum(self.last_y_true * np.log(predictions)) / (y_pred.shape[0] * y_pred.shape[1])
         return ce
 
     def backwards(self):
-        return self.last_y_pred - self.last_y_true
+        return (self.last_y_pred - self.last_y_true) / (self.last_y_pred.shape[0] * self.last_y_pred.shape[1])

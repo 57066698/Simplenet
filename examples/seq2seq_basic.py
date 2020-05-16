@@ -15,7 +15,7 @@
 """
 
 import numpy as np
-from simpleNet import Moduel, losses, layers, optims
+from simpleNet import Moduel, losses, layers, optims, init
 
 # params
 
@@ -73,8 +73,7 @@ decoder_input_data = np.zeros(
     (len(input_texts), max_decoder_seq_length, num_decoder_tokens),
     dtype='float32')
 decoder_target_data = np.zeros(
-    (len(input_texts), max_decoder_seq_length, num_decoder_tokens),
-    dtype='float32')
+    (len(input_texts), max_decoder_seq_length, num_decoder_tokens))
 
 for i, (input_text, target_text) in enumerate(zip(input_texts, target_texts)):
     for t, char in enumerate(input_text):
@@ -134,32 +133,36 @@ class TrainModel(Moduel):
         super().__init__()
         self.encoder = encoder
         self.decoder = decoder
+        self.tanh = layers.Tanh()
         self.dense = dense
-        self.softmax = layers.Softmax()
 
 
     def forwards(self, x1, x2):
 
         _, (h, s) = self.encoder(x1)
         y, (_, _) = self.decoder(x2, (h, s))
+        y = self.tanh(y)
         y = self.dense(y)
-        y = self.softmax(y)
 
         return y
 
     def backwards(self, da):
 
-        da = self.softmax.backwards(da)
         da = self.dense.backwards(da)
+        da = self.tanh.backwards(da)
         da, (dh0, ds0) = self.decoder.backwards(da, None)
         self.encoder.backwards(None, (dh0, ds0))
+
+
+
 
 # train
 
 net = TrainModel()
 net.summary()
+
 dataGen = Gen(encoder_input_data, decoder_input_data, decoder_target_data, batch_size)
-loss = losses.CategoricalCrossEntropy()
+loss = losses.SoftmaxCrossEntropy()
 optim = optims.RMSProp(net)
 
 for i in range(epochs):
@@ -175,5 +178,6 @@ for i in range(epochs):
         if j % 10 == 0:
             print("epoch%d %d/%d:, loss %.02f" % (i, j, len(dataGen), l))
 
+net.save_weights("train.npz")
 # use
 

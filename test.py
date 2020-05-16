@@ -120,7 +120,7 @@ class TrainModel(Moduel):
         self.encoder = encoder
         self.decoder = decoder
         self.dense = dense
-        self.softmax = layers.Softmax()
+        # self.softmax = layers.Softmax()
 
 
     def forwards(self, x1, x2):
@@ -128,25 +128,26 @@ class TrainModel(Moduel):
         _, (h, s) = self.encoder(x1)
         y, (_, _) = self.decoder(x2, (h, s))
         y = self.dense(y)
-        y = self.softmax(y)
+        # y = self.softmax(y)
 
         return y
 
     def backwards(self, da):
 
-        da = self.softmax.backwards(da)
+        # da = self.softmax.backwards(da)
         da = self.dense.backwards(da)
         da, (dh0, ds0) = self.decoder.backwards(da, None)
-        self.encoder.backwards(None, (dh0, ds0))
+        dx = self.encoder.backwards(None, (dh0, ds0))
+        return dx
 
 # train
 
 net = TrainModel()
 net.summary()
-dataGen = Gen(encoder_input_data, decoder_input_data, decoder_target_data, batch_size)
+dataGen = Gen(encoder_input_data, decoder_input_data, decoder_target_data, 2)
 
 (x1, x2), y = dataGen.next_batch(0)
 
-from simpleNet.utils.grad_check import grad_check_one
+from simpleNet.utils.grad_check import grad_check
 
-grad_check_one(net, (x1, x2))
+grad_check(net, (x1, x2))

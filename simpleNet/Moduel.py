@@ -33,14 +33,14 @@ class Moduel(Layer):
                     layer.weights = value[layer_name]
 
     @property
-    def grad(self):
+    def grads(self):
         dic = {}
         for layer in self.layers:
-            dic[layer.name] = layer.grad
+            dic[layer.name] = layer.grads
         return dic
 
-    @grad.setter
-    def grad(self, value):
+    @grads.setter
+    def grads(self, value):
         raise NotImplementedError()
 
     @property

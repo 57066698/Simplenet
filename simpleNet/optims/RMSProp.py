@@ -8,7 +8,7 @@ import numpy as np
 
 class RMSProp:
 
-    def __init__(self, model: Layer, lr: float = 1e-3, alpha: float = 0.99, eps: float = 1e-8):
+    def __init__(self, model: Layer, lr: float = 1e-3, alpha: float = 0.9, eps: float = 1e-7):
         self.model = model
         self.lr = lr
         self.alpha = alpha

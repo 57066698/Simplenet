@@ -14,6 +14,10 @@ class Layer:
     def mode(self, value):
         self._mode = value
 
+    @property
+    def grads(self):
+        return self.cached_grad
+
     def backwards(self, da):
         raise NotImplementedError()
 

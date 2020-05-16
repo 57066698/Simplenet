@@ -21,20 +21,18 @@ import numpy as np
 
 
 class LSTM(Layer):
-    def __init__(self, input_size, hidden_size, return_sequence:bool = False, return_state:bool = False):
+    def __init__(self, input_size, hidden_size):
         super().__init__()
         self.name = "LSTM"
 
         self.input_size = input_size
         self.hidden_size = hidden_size
-        self.return_sequence = return_sequence
-        self.return_state = return_state
 
         # torch 初始化 U(-(1/hidden)**0.5, sqrt(1/hidden)**0.5)
-        low, high = - (1/hidden_size) ** 0.5, (1/hidden_size) ** 0.5
+        low, high = - (6/(hidden_size+input_size)) ** 0.5, (6/(hidden_size+input_size)) ** 0.5
         wx = np.random.uniform(low, high, (input_size, 4 * hidden_size))  # in, forgot, quit, g 顺序 4 个门
         wh = np.random.uniform(low, high, (hidden_size, 4 * hidden_size))
-        b = np.random.uniform(low, high, (4 * hidden_size))
+        b = np.zeros(4 * hidden_size)
 
         S0 = np.zeros(hidden_size)
         H0 = np.zeros(hidden_size)
@@ -53,9 +51,9 @@ class LSTM(Layer):
         if init:
             assert init[0].shape == (N, hidden_size)
             assert init[1].shape == (N, hidden_size)
-            S0, H0 = init
+            H0, S0 = init
         else:
-            S0, H0 = self.weights["S0"], self.weights["H0"]
+            H0, S0 = self.weights["H0"], self.weights["S0"]
 
         assert input_size == x_dim
 
@@ -153,7 +151,14 @@ class LSTM(Layer):
 
         return dx, ds_prev, dh_prev, dwx, dwh, db
 
-    def backwards(self, da, dhds=None):
+    def backwards(self, da=None, dhds=None):
+        """
+        da 和 dhds 至少要由一项
+        :param da:
+        :param dhds: (dh_last, ds_last)
+        :return:
+        """
+
         caches, input_size, hidden_size = self.caches, self.input_size, self.hidden_size
         N, length, out_size = self.cached_hShape
 

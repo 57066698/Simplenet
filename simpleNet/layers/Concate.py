@@ -8,8 +8,7 @@ class Concate(Layer):
         self.name = "Concate"
         self.axis = axis
 
-    def __call__(self, *args, **kwargs):
-        mats = args[0]
+    def __call__(self, mats):
         y = np.concatenate(mats, axis=self.axis)
         self.caches = mats
         return y
