@@ -133,51 +133,79 @@ class TrainModel(Moduel):
         super().__init__()
         self.encoder = encoder
         self.decoder = decoder
-        self.tanh = layers.Tanh()
         self.dense = dense
-
 
     def forwards(self, x1, x2):
 
         _, (h, s) = self.encoder(x1)
         y, (_, _) = self.decoder(x2, (h, s))
-        y = self.tanh(y)
         y = self.dense(y)
-
         return y
 
     def backwards(self, da):
-
         da = self.dense.backwards(da)
-        da = self.tanh.backwards(da)
         da, (dh0, ds0) = self.decoder.backwards(da, None)
         self.encoder.backwards(None, (dh0, ds0))
 
 
-
-
-# train
-
 net = TrainModel()
 net.summary()
 
-dataGen = Gen(encoder_input_data, decoder_input_data, decoder_target_data, batch_size)
-loss = losses.SoftmaxCrossEntropy()
-optim = optims.RMSProp(net)
+# train
 
-for i in range(epochs):
-    for j in range(len(dataGen)):
+#
+#
+# dataGen = Gen(encoder_input_data, decoder_input_data, decoder_target_data, batch_size)
+# loss = losses.SoftmaxCrossEntropy()
+# optim = optims.RMSProp(net)
+#
+# for i in range(epochs):
+#     for j in range(len(dataGen)):
+#
+#         (x1, x2), y_true = dataGen.next_batch(j)
+#         y_pred = net(x1, x2)  # [batch, len, dim]
+#         l = loss(y_pred, y_true)
+#         da = loss.backwards()
+#         net.backwards(da)
+#         optim.step()
+#
+#         if j % 10 == 0:
+#             print("epoch%d %d/%d:, loss %.02f" % (i, j, len(dataGen), l))
+#
+# net.save_weights("train.npz")
 
-        (x1, x2), y_true = dataGen.next_batch(j)
-        y_pred = net(x1, x2)
-        l = loss(y_pred, y_true)
-        da = loss.backwards()
-        net.backwards(da)
-        optim.step()
-
-        if j % 10 == 0:
-            print("epoch%d %d/%d:, loss %.02f" % (i, j, len(dataGen), l))
-
-net.save_weights("train.npz")
 # use
+net.load_weights("train.npz")
 
+def ind_to_onehot_batch(ind, num):
+    onehot = np.zeros((1, 1, num))
+    onehot[0, 0, ind] = 1
+    return onehot
+
+reverse_target_char_index = dict(
+    (i, char) for char, i in target_token_index.items())
+
+
+arr = np.random.randint(0, len(input_texts), 5)
+
+for i in arr.tolist():
+
+    input = np.expand_dims(encoder_input_data[i, ...], axis=0)
+    _, (h0, s0) = encoder(input)
+
+    output_text = []
+    last_char = ind_to_onehot_batch(target_token_index['\t'], num_decoder_tokens)
+    stop_condition = False
+    while not stop_condition:
+        char_netout, (h0, s0) = decoder(last_char, (h0, s0))
+        char_ind_batch = dense(char_netout)
+        char_ind = np.argmax(char_ind_batch[0, 0])
+        char = reverse_target_char_index[char_ind]
+
+        output_text.append(char)
+        if (char == '\n') or len(output_text) >= max_decoder_seq_length:
+            stop_condition = True
+        last_char = ind_to_onehot_batch(char_ind, num_decoder_tokens)
+
+    print(input_texts[i])
+    print("".join(output_text))

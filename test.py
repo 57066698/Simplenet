@@ -1,6 +1,6 @@
-
 import numpy as np
-from simpleNet import Moduel, losses, layers, optims
+from simpleNet import Moduel, losses, layers, optims, init
+
 
 # params
 
@@ -58,8 +58,7 @@ decoder_input_data = np.zeros(
     (len(input_texts), max_decoder_seq_length, num_decoder_tokens),
     dtype='float32')
 decoder_target_data = np.zeros(
-    (len(input_texts), max_decoder_seq_length, num_decoder_tokens),
-    dtype='float32')
+    (len(input_texts), max_decoder_seq_length, num_decoder_tokens))
 
 for i, (input_text, target_text) in enumerate(zip(input_texts, target_texts)):
     for t, char in enumerate(input_text):
@@ -120,7 +119,7 @@ class TrainModel(Moduel):
         self.encoder = encoder
         self.decoder = decoder
         self.dense = dense
-        # self.softmax = layers.Softmax()
+        # self.softmax = layers.Softmax(axis=-1)
 
 
     def forwards(self, x1, x2):
@@ -129,16 +128,13 @@ class TrainModel(Moduel):
         y, (_, _) = self.decoder(x2, (h, s))
         y = self.dense(y)
         # y = self.softmax(y)
-
         return y
 
     def backwards(self, da):
-
         # da = self.softmax.backwards(da)
         da = self.dense.backwards(da)
         da, (dh0, ds0) = self.decoder.backwards(da, None)
-        dx = self.encoder.backwards(None, (dh0, ds0))
-        return dx
+        self.encoder.backwards(None, (dh0, ds0))
 
 # train
 
@@ -147,7 +143,7 @@ net.summary()
 dataGen = Gen(encoder_input_data, decoder_input_data, decoder_target_data, 2)
 
 (x1, x2), y = dataGen.next_batch(0)
-
 from simpleNet.utils.grad_check import grad_check
 
-grad_check(net, (x1, x2))
+
+grad_check(net, (x1, x2), loss=losses.SoftmaxCrossEntropy(), y_true=y)

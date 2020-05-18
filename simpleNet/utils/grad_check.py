@@ -3,7 +3,7 @@ from simpleNet.layers.Layer import Layer
 from simpleNet import Moduel
 
 
-def grad_check(layer: Layer, inputs, start=0, loss=None):
+def grad_check(layer: Layer, inputs, start=0, loss=None, y_true=None):
     """
     梯度检查
     :param layer: 目标
@@ -25,7 +25,9 @@ def grad_check(layer: Layer, inputs, start=0, loss=None):
 
     change_all_weights(layer)
     y_pred = layer(*X)
-    layer.backwards(loss.backwards(y_pred))
+    loss(y_pred, y_true)
+    da = loss.backwards()
+    layer.backwards(da)
 
     # weights 和 grads 的 list
     weight_dic = layer.weights
@@ -59,9 +61,9 @@ def grad_check(layer: Layer, inputs, start=0, loss=None):
         for j in range(use_num):
             ind = get_shape_ind(weight.shape, j)
             weight[ind] += epsilon
-            J_plus = loss(layer(*X))
+            J_plus = loss(layer(*X), y_true)
             weight[ind] -= 2 * epsilon
-            J_minus = loss(layer(*X))
+            J_minus = loss(layer(*X), y_true)
             weight[ind] += epsilon
             gradapprox_1d[j] = (J_plus - J_minus) / (2 * epsilon)
 
@@ -161,7 +163,8 @@ def get_shape_ind(shape, n):
 class My_loss:
 
     def __call__(self, y_pred, y_true=None):
+        self.cached_y_pred = y_pred
         return np.sum(y_pred) / y_pred.shape[0]
 
-    def backwards(self, y_pred, y_true=None):
-        return np.ones_like(y_pred) / y_pred.shape[0]
+    def backwards(self):
+        return np.ones_like(self.cached_y_pred) / self.cached_y_pred.shape[0]

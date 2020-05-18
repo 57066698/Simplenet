@@ -16,3 +16,4 @@ from simpleNet.layers.Reshape import Reshape
 from simpleNet.layers.Batch_Normalization import Batch_Normalization
 from simpleNet.layers.Embedding import Embedding
 from simpleNet.layers.Concate import Concate
+from simpleNet.layers.Transpose import Transpose

@@ -17,6 +17,7 @@ class CategoricalCrossEntropy:
         self.last_y_true = y_true
         epsilon = 1e-12
         predictions = np.clip(self.last_y_pred, epsilon, 1. - epsilon)
+        #todo: 这个除只能针对3维情况
         ce = -np.sum(self.last_y_true * np.log(predictions)) / (y_pred.shape[0] * y_pred.shape[1])
         return ce
 

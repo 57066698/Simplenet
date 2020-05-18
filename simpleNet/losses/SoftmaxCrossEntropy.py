@@ -3,27 +3,36 @@ import numpy as np
 
 class SoftmaxCrossEntropy:
 
-    def __init__(self):
+    def __init__(self, axis = -1):
         self.last_y_true = None
         self.last_y_pred = None
+        self.axis = axis
 
     def __call__(self, y_pred, y_true):
-        # y_pred [batch, class, len]
-        # y_true [batch, class, len]
+        # y_pred [batch, class, ...]
+        # y_true [batch, class, ...]
 
-        self.last_y_pred = y_pred
-        self.last_y_true = y_true
+        exp_x = np.exp(y_pred - np.max(y_pred, axis=self.axis, keepdims=True))
+        softmax = exp_x / np.sum(exp_x, axis=self.axis, keepdims=True)
 
-        left = - np.sum(y_pred * y_true)
+        epsilon = 1e-12
+        predictions = np.clip(softmax, epsilon, 1. - epsilon)
+        ce = -np.sum(y_true * np.log(predictions)) / (y_pred.shape[0] * y_pred.shape[1])
 
-        right_batch = np.sum(np.exp(y_pred), axis=1)
-        right_log_batch = np.log(right_batch)
-        right = np.sum(right_log_batch)
+        self.grad = (softmax - y_true) / (y_pred.shape[0] * y_pred.shape[1])
+        return ce
 
-        shape = y_pred.shape
 
-        l = (left + right) / (shape[0] * shape[2])
-        return l
+        # left = - np.sum(y_pred * y_true)
+        #
+        # right_batch = np.sum(np.exp(y_pred), axis=1)
+        # right_log_batch = np.log(right_batch)
+        # right = np.sum(right_log_batch)
+        #
+        # shape = y_pred.shape
+        #
+        # l = (left + right) / (shape[0] * shape[2])
+        # return l
 
     def backwards(self):
-        return (self.last_y_pred - self.last_y_true) / (self.last_y_pred.shape[0] * self.last_y_pred.shape[1])
+        return self.grad
