@@ -1,6 +1,8 @@
 import numpy as np
 
-
+"""
+    经测试等同torch的CategoryCrossEntropy, 除 N 的同时还要除 C
+"""
 class SoftmaxCrossEntropy:
 
     def __init__(self, axis = -1):

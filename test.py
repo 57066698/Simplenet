@@ -1,102 +1,152 @@
 import numpy as np
-from simpleNet import Moduel, losses, layers, optims, init
+from simpleNet import layers, Moduel, optims, losses, init
+import matplotlib.pyplot as plt
+"""
+    AC_Gan 论文实现
+"""
+
+# model
+class Generator(Moduel):
+    def __init__(self, latent_dim, n_classes=10):
+        super().__init__()
+        # x: [N, latent_dim + n_classes]
+
+        self.in_latent = Moduel([
+            layers.Dense(latent_dim, 128 * 7 * 7),
+            layers.Relu(),
+            layers.Reshape((-1, 128, 7, 7))
+        ])
+
+        self.in_class = Moduel([
+            layers.Embedding(n_classes, 50),
+            layers.Dense(50, 7 * 7),
+            layers.Reshape((-1, 1, 7, 7))
+        ])
+
+        self.concate = layers.Concate(axis=1)  # [N, 129, 7, 7]
+
+        self.convTrans1 = Moduel([
+            layers.Conv2DTranspose(129, 64, 5, 2, padding="same", bias=False),
+            layers.Batch_Normalization2D(64),
+            layers.Relu()
+        ])
+
+        self.convTrans2 = Moduel([
+            layers.Conv2DTranspose(64, 1, 5, 2, padding='same', bias=False),
+            layers.Sigmoid()
+        ])
+
+    def forwards(self, latent_batch, class_ind_batch):
+        x1 = self.in_latent(latent_batch)
+        x2 = self.in_class(class_ind_batch)
+
+        x = self.concate((x1, x2))
+
+        x = self.convTrans1(x)
+        x = self.convTrans2(x)
+
+        return x
+
+    def backwards(self, da):
+        dx = self.convTrans2.backwards(da)
+        dx = self.convTrans1.backwards(dx)
+
+        dx1, dx2 = self.concate.backwards(dx)
+
+        self.in_class.backwards(dx2)
+        self.in_latent.backwards(dx1)
+
+        return None
 
 
-# params
+class Discriminator(Moduel):
 
-batch_size = 64
-epochs = 5
-latent_dim = 256
-num_samples = 10000
-data_path = 'examples/datasets/fra.txt'
+    def conv_block(self, in_channel, out_channel, kernel, stride, bn, dp):
 
-# handle data
+        block = Moduel()
+        block.conv = layers.Conv2D(in_channel, out_channel, kernel, stride, padding='same', bias=False)
+        if bn:
+            block.bn = layers.Batch_Normalization2D(out_channel)
+        block.leaklyRelu = layers.Leakly_Relu(0.2)
+        if dp:
+            block.dropout = layers.Dropout(0.5)
+        return block
 
-input_texts = []
-target_texts = []
-input_characters = set()
-target_characters = set()
-with open(data_path, 'r', encoding='utf-8') as f:
-    lines = f.read().split('\n')
-for line in lines[: min(num_samples, len(lines) - 1)]:
-    input_text, target_text, _ = line.split('\t')
-    # We use "tab" as the "start sequence" character
-    # for the targets, and "\n" as "end sequence" character.
-    target_text = '\t' + target_text + '\n'
-    input_texts.append(input_text)
-    target_texts.append(target_text)
-    for char in input_text:
-        if char not in input_characters:
-            input_characters.add(char)
-    for char in target_text:
-        if char not in target_characters:
-            target_characters.add(char)
+    def __init__(self):
+        # x [N, 1, 32, 32]
+        super().__init__()
 
-input_characters = sorted(list(input_characters))
-target_characters = sorted(list(target_characters))
-num_encoder_tokens = len(input_characters)
-num_decoder_tokens = len(target_characters)
-max_encoder_seq_length = max([len(txt) for txt in input_texts])
-max_decoder_seq_length = max([len(txt) for txt in target_texts])
+        self.convs = Moduel([
+            self.conv_block(1, 16, 3, 2, bn=False, dp=False),
+            self.conv_block(16, 32, 3, 1, bn=True, dp=True),
+            self.conv_block(32, 64, 3, 2, bn=True, dp=True),
+            self.conv_block(64, 128, 3, 1, bn=True, dp=True),
+        ])
 
-print('Number of samples:', len(input_texts))
-print('Number of unique input tokens:', num_encoder_tokens)
-print('Number of unique output tokens:', num_decoder_tokens)
-print('Max sequence length for inputs:', max_encoder_seq_length)
-print('Max sequence length for outputs:', max_decoder_seq_length)
+        # x [N, 128, 7, 7]
+        self.flatten = layers.Flatten()
+
+        # x [N, 128 * 7 * 7]
+        self.out_1 = Moduel([
+            layers.Dense(128 * 7 * 7, 1),
+            layers.Sigmoid()
+        ])
+
+        self.out2 = Moduel([
+            layers.Dense(128 * 7 * 7, 10),
+            layers.Softmax()
+        ])
+
+    def forwards(self, x):
+        x = self.convs(x)
+        x = self.flatten(x)
+        ture_false = self.out_1(x)
+        clas = self.out2(x)
+        return ture_false, clas
+
+    def backwards(self, dture_false, dclas):
+        dture_false = self.out_1.backwards(dture_false)
+        # dclas = self.out2.backwards(dclas)
+        dx = dture_false  # + dclas
+        dx = self.flatten.backwards(dx)
+        dx = self.convs.backwards(dx)
+        return dx
 
 
-input_token_index = dict(
-    [(char, i) for i, char in enumerate(input_characters)])
-target_token_index = dict(
-    [(char, i) for i, char in enumerate(target_characters)])
+# data and gen
+# db = np.load("./datasets/fmnist.npz")
+# x_train, y_train, x_test, y_test = db["x_train"], db["y_train"], db["x_test"], db["y_test"]
 
-encoder_input_data = np.zeros(
-    (len(input_texts), max_encoder_seq_length, num_encoder_tokens),
-    dtype='float32')
-decoder_input_data = np.zeros(
-    (len(input_texts), max_decoder_seq_length, num_decoder_tokens),
-    dtype='float32')
-decoder_target_data = np.zeros(
-    (len(input_texts), max_decoder_seq_length, num_decoder_tokens))
+from examples.datasets.mnist_loader import load_train, load_test
 
-for i, (input_text, target_text) in enumerate(zip(input_texts, target_texts)):
-    for t, char in enumerate(input_text):
-        encoder_input_data[i, t, input_token_index[char]] = 1.
-    encoder_input_data[i, t + 1:, input_token_index[' ']] = 1.
-    for t, char in enumerate(target_text):
-        # decoder_target_data is ahead of decoder_input_data by one timestep
-        decoder_input_data[i, t, target_token_index[char]] = 1.
-        if t > 0:
-            # decoder_target_data will be ahead by one timestep
-            # and will not include the start character.
-            decoder_target_data[i, t - 1, target_token_index[char]] = 1.
-    decoder_input_data[i, t + 1:, target_token_index[' ']] = 1.
-    decoder_target_data[i, t:, target_token_index[' ']] = 1.
+x_train, y_train = load_train()
 
 
 # 数据gen
-class Gen:
-    def __init__(self, encoder_input, decoder_input, decoder_target, batch_size):
+class RealGen:
+    def __init__(self, X, Y, batch_size: int = 64):
         self.batch_size = batch_size
-        self.x1 = encoder_input
-        self.x2 = decoder_input
-        self.y = decoder_target
-        self.inds = np.arange(encoder_input.shape[0])
+        X = np.reshape(X, (X.shape[0], 1, 28, 28))
+        self.X = X / 255.0
+        self.Y = Y
+        self.inds = np.arange(X.shape[0])
         self.end_epoch()
 
-    def next_batch(self, ind:int):
+    def next_batch(self, ind: int):
         left = ind * self.batch_size
-        right = (ind+1) * self.batch_size
+        right = (ind + 1) * self.batch_size
         right = min(right, self.inds.shape[0])
 
         batch_inds = self.inds[left:right]
 
-        return (self.x1[batch_inds], self.x2[batch_inds]), self.y[batch_inds]
+        batch_X = self.X[batch_inds]
+        batch_Y = self.Y[batch_inds]
+
+        return batch_X, batch_Y
 
     def __len__(self):
         import math
-        return math.ceil(self.inds.shape[0] / self.batch_size)
+        return math.floor(self.inds.shape[0] / self.batch_size)  # 避免少出
 
     def end_epoch(self):
         np.random.shuffle(self.inds)
@@ -104,46 +154,27 @@ class Gen:
     def totol_num(self):
         return self.inds.shape[0]
 
-(x1, x2), y = Gen(encoder_input_data, decoder_input_data, decoder_target_data, batch_size).next_batch(0)
-print("x1: %s, x2: %s, y: %s" % (str(x1.shape), str(x2.shape), str(y.shape)))
-
-# train model
-
-encoder = layers.LSTM(num_encoder_tokens, latent_dim)
-decoder = layers.LSTM(num_decoder_tokens, latent_dim)
-dense = layers.Dense(latent_dim, num_decoder_tokens)
-
-class TrainModel(Moduel):
-    def __init__(self):
-        super().__init__()
-        self.encoder = encoder
-        self.decoder = decoder
-        self.dense = dense
-        # self.softmax = layers.Softmax(axis=-1)
-
-
-    def forwards(self, x1, x2):
-
-        _, (h, s) = self.encoder(x1)
-        y, (_, _) = self.decoder(x2, (h, s))
-        y = self.dense(y)
-        # y = self.softmax(y)
-        return y
-
-    def backwards(self, da):
-        # da = self.softmax.backwards(da)
-        da = self.dense.backwards(da)
-        da, (dh0, ds0) = self.decoder.backwards(da, None)
-        self.encoder.backwards(None, (dh0, ds0))
 
 # train
+latent_dim = 100
+batch_size = 128
+n_class = 10
 
-net = TrainModel()
-net.summary()
-dataGen = Gen(encoder_input_data, decoder_input_data, decoder_target_data, 2)
+def latent_gen(batch_size, latent_dim=100, n_class=10):
+    latent = np.random.randn(batch_size, latent_dim)
+    clas = np.random.randint(0, n_class, batch_size)
+    return latent, clas
 
-(x1, x2), y = dataGen.next_batch(0)
+generator = Generator(latent_dim, n_class)
+discriminator = Discriminator()
+# init.Normal_(generator.weights, 0, 0.2, "w")  # 对所有名字含w的weight重新初始化
+# init.Normal_(discriminator.weights, 0, 0.2, "w")
+
+real_gen = RealGen(x_train, y_train, 2)
+
+x_imgs, y_cls = real_gen.next_batch(0)
+latent, y_cls = latent_gen(2)
+
 from simpleNet.utils.grad_check import grad_check
-
-
-grad_check(net, (x1, x2), loss=losses.SoftmaxCrossEntropy(), y_true=y)
+grad_check(generator, (latent, y_cls))
+# grad_check(discriminator, x_imgs)

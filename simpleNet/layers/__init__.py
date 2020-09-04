@@ -13,7 +13,8 @@ from simpleNet.layers.LSTM import LSTM
 from simpleNet.layers.GRU import GRU
 from simpleNet.layers.Conv2DTranspose import Conv2DTranspose
 from simpleNet.layers.Reshape import Reshape
-from simpleNet.layers.Batch_Normalization import Batch_Normalization
+from simpleNet.layers.Batch_Normalization1D import Batch_Normalization1D
+from simpleNet.layers.Batch_Normalization2D import Batch_Normalization2D
 from simpleNet.layers.Embedding import Embedding
 from simpleNet.layers.Concate import Concate
 from simpleNet.layers.Transpose import Transpose

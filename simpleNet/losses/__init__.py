@@ -1,4 +1,3 @@
 from simpleNet.losses.MeanSqauredError import MeanSquaredError
-from simpleNet.losses.CategoricalCrossEntropy import CategoricalCrossEntropy
 from simpleNet.losses.BinaryCrossEntropy import BinaryCrossEntropy
 from simpleNet.losses.SoftmaxCrossEntropy import SoftmaxCrossEntropy

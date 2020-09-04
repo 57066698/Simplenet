@@ -8,10 +8,13 @@ class Sigmoid(Layer):
         self.name = "Sigmoid"
 
     def __call__(self, x):
-        return 1 / (1 + np.exp(-x))
+        a = 1 / (1 + np.exp(-x))
+        self.cached_a = a
+        return a
 
     def backwards(self, da):
-        return da * (1-da)
+        a = self.cached_a
+        return a * (1-a) * da
 
     def __str__(self):
         return self.name

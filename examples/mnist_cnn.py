@@ -14,11 +14,13 @@ class Net(Moduel):
     def __init__(self):
         super().__init__()
 
-        self.conv1 = layers.Conv2D(1, 16, 3, padding='same')
+        self.conv1 = layers.Conv2D(1, 16, 3, padding='same', bias=False)
+        self.bn1 = layers.Batch_Normalization(axis=1)
         self.relu1 = layers.Relu()
         self.pool1 = layers.MaxPooling2D(2)
 
-        self.conv2 = layers.Conv2D(16, 32, 3, padding='same')
+        self.conv2 = layers.Conv2D(16, 32, 3, padding='same', bias=False)
+        self.bn2 = layers.Batch_Normalization(axis=1)
         self.relu2 = layers.Relu()
         self.pool2 = layers.MaxPooling2D(2)
 
@@ -30,7 +32,6 @@ class Net(Moduel):
         self.dropout2 = layers.Dropout(0.5)
 
         self.dense2 = layers.Dense(128, 10)
-        self.softmax = layers.Softmax()
 
 # 数据gen
 class Gen:
@@ -73,8 +74,8 @@ class Gen:
 net = Net()
 net.summary()
 
-criterrion = losses.CategoricalCrossEntropy()
-optimizer = optims.RMSProp(net)
+criterrion = losses.SoftmaxCrossEntropy()
+optimizer = optims.Adam(net)
 gen_train = Gen(X_train, Y_train)
 gen_test = Gen(X_train, Y_train)
 
@@ -106,3 +107,5 @@ for i in range(epochs):
         right = Y_pred == y_list
         num_right += np.sum(right.astype(np.int))
     print("accuracy: ", num_right / num_total)
+
+

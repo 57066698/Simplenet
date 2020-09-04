@@ -14,6 +14,8 @@ def grad_check(layer: Layer, inputs, start=0, loss=None, y_true=None):
     """
     epsilon = 1e-7
 
+
+
     if loss is None:
         loss = My_loss()
 
@@ -28,6 +30,7 @@ def grad_check(layer: Layer, inputs, start=0, loss=None, y_true=None):
     loss(y_pred, y_true)
     da = loss.backwards()
     layer.backwards(da)
+    # layer.mode = 'test'  # 后面都是test了
 
     # weights 和 grads 的 list
     weight_dic = layer.weights
@@ -78,7 +81,7 @@ def grad_check(layer: Layer, inputs, start=0, loss=None, y_true=None):
         diff = numerator / denominator
 
         print("")
-        print("%d/%d %s: %.08f ------------------" % (i, len(weight_list), path, diff))
+        print("%d/%d %s: %.08f , shape %s ------------------" % (i, len(weight_list), path, diff, weight.shape))
         print(grads_1d)
         print(gradapprox_1d)
 
@@ -163,8 +166,14 @@ def get_shape_ind(shape, n):
 class My_loss:
 
     def __call__(self, y_pred, y_true=None):
+        """
+            如果要令loss等于1，则输入 y_ture:   sum(y_pred - y_true) / N = 1
+        """
         self.cached_y_pred = y_pred
         return np.sum(y_pred) / y_pred.shape[0]
 
     def backwards(self):
-        return np.ones_like(self.cached_y_pred) / self.cached_y_pred.shape[0]
+        """
+            返回每个sample Loss 为1 的da
+        """
+        return np.ones(self.cached_y_pred.shape) / self.cached_y_pred.shape[0]

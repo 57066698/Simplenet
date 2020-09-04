@@ -7,15 +7,14 @@ class Tanh(Layer):
         super().__init__()
         self.name = "Tanh"
 
-    def __call__(self, *args, **kwargs):
-        x = args[0]
-        y = (1 - np.exp(-2 * x)) / (1 + np.exp(-2 * x))
-        self.cached_y = y
-        return y
+    def __call__(self, x):
+        a = 2 / (1 + np.exp(-2 * x)) - 1
+        self.cached_a = a
+        return a
 
     def backwards(self, da):
-        dx = 1 - self.cached_y ** 2
-        return dx
+        z = (1 - self.cached_a ** 2) * da
+        return z
 
     def __str__(self):
         return self.name

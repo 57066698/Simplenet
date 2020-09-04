@@ -23,11 +23,11 @@ class Generator(Moduel):
             layers.Reshape((-1, 1, 7, 7))
         ])
 
-        self.concate = layers.Concate(axis=1)  # [N, 129, 7, 7]
+        self.concate = layers.Concate(axis=1)  # [N, 385, 7, 7]
 
         self.convTrans1 = Moduel([
             layers.Conv2DTranspose(129, 64, 5, 2, padding="same", bias=False),
-            layers.Batch_Normalization(),
+            layers.Batch_Normalization2D(64),
             layers.Relu()
         ])
 
@@ -66,7 +66,7 @@ class Discriminator(Moduel):
         block = Moduel()
         block.conv = layers.Conv2D(in_channel, out_channel, kernel, stride, padding='same', bias=False)
         if bn:
-            block.bn = layers.Batch_Normalization()
+            block.bn = layers.Batch_Normalization2D(out_channel)
         block.leaklyRelu = layers.Leakly_Relu(0.2)
         if dp:
             block.dropout = layers.Dropout(0.5)
@@ -77,7 +77,7 @@ class Discriminator(Moduel):
         super().__init__()
 
         self.convs = Moduel([
-            self.conv_block(1, 16, 3, 2, bn=False, dp=False),
+            self.conv_block(1, 16, 3, 2, bn=False, dp=True),
             self.conv_block(16, 32, 3, 1, bn=True, dp=True),
             self.conv_block(32, 64, 3, 2, bn=True, dp=True),
             self.conv_block(64, 128, 3, 1, bn=True, dp=True),
@@ -94,7 +94,6 @@ class Discriminator(Moduel):
 
         self.out2 = Moduel([
             layers.Dense(128 * 7 * 7, 10),
-            layers.Softmax()
         ])
 
     def forwards(self, x):
@@ -106,8 +105,8 @@ class Discriminator(Moduel):
 
     def backwards(self, dture_false, dclas):
         dture_false = self.out_1.backwards(dture_false)
-        # dclas = self.out2.backwards(dclas)
-        dx = dture_false  # + dclas
+        dclas = self.out2.backwards(dclas)
+        dx = dture_false + dclas
         dx = self.flatten.backwards(dx)
         dx = self.convs.backwards(dx)
         return dx
@@ -185,14 +184,14 @@ n_class = 10
 
 generator = Generator(latent_dim, n_class)
 discriminator = Discriminator()
-init.Normal_(generator, 0, 0.2, "w")  # 对所有名字含w的weight重新初始化
-init.Normal_(discriminator, 0, 0.2, "w")
+init.Normal_(generator.weights, 0, 0.02, "w")  # 对所有名字含w的weight重新初始化
+init.Normal_(discriminator.weights, 0, 0.02, "w")
 generator.summary()
 discriminator.summary()
 half_batch = int(batch_size / 2)
 real_gen = RealGen(x_train, y_train, half_batch)
 loss_real = losses.BinaryCrossEntropy()
-loss_cls = losses.CategoricalCrossEntropy()
+loss_cls = losses.SoftmaxCrossEntropy()
 optim_g = optims.Adam(generator, lr=0.0002, fy1=0.5)
 optim_d = optims.Adam(discriminator, lr=0.0002, fy1=0.5)
 
@@ -223,6 +222,9 @@ def train_generator(latent, y_real, y_cls):
     return l_real, l_cls
 
 
+# generator.load_weights("gen.npz")
+# discriminator.load_weights("dis.npz")
+
 for i in range(10):
     for j in range(len(real_gen)):
         # 真的一半，训D
@@ -252,3 +254,20 @@ for i in range(10):
     show_imgs(x_imgs, i)
     generator.save_weights("gen.npz")
     discriminator.save_weights("dis.npz")
+
+
+"""
+    测试1，Discriminator 可否正常工作
+    0~4设为真, 5~9设为假
+"""
+for i in range(10):
+    print("batch", i)
+    for j in range(len(real_gen)):
+        x_imgs, y_cls = real_gen.next_batch(j)  # [N/2, 1, 28, 28], [N/2, ]
+        y_real = [int(y_cls[k] <= 4) for k in range(len(y_cls))]
+        y_real = np.expand_dims(np.array(y_real, dtype=np.float), -1)
+        l_s1, l_c1 = train_discriminator(x_imgs, y_real, one_hot(y_cls))
+        print(l_s1, l_c1)
+
+
+
