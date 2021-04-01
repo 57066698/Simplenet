@@ -10,7 +10,7 @@ from simpleNet import Moduel
 
 class SGD:
 
-    def __init__(self, model: Layer, lr: float=0.0001):
+    def __init__(self, model: Layer, lr: float = 0.0001):
         self.model = model
         self.lr = lr
 
@@ -25,5 +25,3 @@ class SGD:
 
     def step(self):
         self._step(self.model)
-
-

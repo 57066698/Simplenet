@@ -42,7 +42,7 @@ class RMSProp:
                 s = args["s"]
                 if s is None:
                     s = np.zeros(grad.shape)
-                s = self.alpha * s + (1.0-self.alpha) * np.square(grad)
+                s = self.alpha * s + (1.0 - self.alpha) * np.square(grad)
                 args["s"] = s
                 layer.weights[key] -= self.lr * grad / np.sqrt(s + self.eps)
 
@@ -52,5 +52,3 @@ class RMSProp:
             self.inited = True
 
         self._step(self.model)
-
-

@@ -1,6 +1,8 @@
 import numpy as np
 
-
+"""
+    方差loss
+"""
 class MeanSquaredError:
 
     def __init__(self):

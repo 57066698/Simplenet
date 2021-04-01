@@ -20,33 +20,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="75204f01-2a62-4ce8-86c3-e8913647609a" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/checks/layers/check_Batch_Normalization1D.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/checks/layers/check_Batch_Normalization2D.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/checks/layers/check_ConvTrans.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/checks/layers/check_Tanh.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/setup.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/simpleNet/utils/grad_check_torch.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test3.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/simpleNet/layers/attention.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/SimpleNet.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/SimpleNet.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/checks/layers/check_Batch_Normalization.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/ac_gan.py" beforeDir="false" afterPath="$PROJECT_DIR$/examples/ac_gan.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/dis.npz" beforeDir="false" afterPath="$PROJECT_DIR$/examples/dis.npz" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/gen.npz" beforeDir="false" afterPath="$PROJECT_DIR$/examples/gen.npz" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/examples/mnist_cnn.py" beforeDir="false" afterPath="$PROJECT_DIR$/examples/mnist_cnn.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simpleNet/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/simpleNet/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simpleNet/layers/Batch_Normalization.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/simpleNet/layers/Sigmoid.py" beforeDir="false" afterPath="$PROJECT_DIR$/simpleNet/layers/Sigmoid.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simpleNet/layers/Tanh.py" beforeDir="false" afterPath="$PROJECT_DIR$/simpleNet/layers/Tanh.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simpleNet/layers/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/simpleNet/layers/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simpleNet/losses/CategoricalCrossEntropy.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/simpleNet/layers/Dense.py" beforeDir="false" afterPath="$PROJECT_DIR$/simpleNet/layers/Dense.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simpleNet/losses/BinaryCrossEntropy.py" beforeDir="false" afterPath="$PROJECT_DIR$/simpleNet/losses/BinaryCrossEntropy.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simpleNet/losses/MeanSqauredError.py" beforeDir="false" afterPath="$PROJECT_DIR$/simpleNet/losses/MeanSqauredError.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/simpleNet/losses/SoftmaxCrossEntropy.py" beforeDir="false" afterPath="$PROJECT_DIR$/simpleNet/losses/SoftmaxCrossEntropy.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simpleNet/losses/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/simpleNet/losses/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simpleNet/utils/grad_check.py" beforeDir="false" afterPath="$PROJECT_DIR$/simpleNet/utils/grad_check.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test2.py" beforeDir="false" afterPath="$PROJECT_DIR$/test2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/testa_numba_matmul.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/新建文本文档.txt" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simpleNet/optims/RMSProp.py" beforeDir="false" afterPath="$PROJECT_DIR$/simpleNet/optims/RMSProp.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simpleNet/optims/SGD.py" beforeDir="false" afterPath="$PROJECT_DIR$/simpleNet/optims/SGD.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -101,7 +85,7 @@
       <recent name="C:\Users\57066\Desktop\projects\SimpleNet\simpleNet\loss" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.ac_gan">
+  <component name="RunManager" selected="Python.mnist_cnn">
     <configuration name="ac_gan" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="SimpleNet" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -115,27 +99,6 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/examples/ac_gan.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="check_Batch_Normalization2D" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="SimpleNet" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/checks/layers" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/checks/layers/check_Batch_Normalization2D.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -186,6 +149,27 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="mnist_cnn" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="SimpleNet" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/examples" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/examples/mnist_cnn.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="test" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="SimpleNet" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -209,14 +193,15 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.mnist_cnn" />
         <item itemvalue="Python.ac_gan" />
         <item itemvalue="Python.check_Tanh" />
         <item itemvalue="Python.test" />
         <item itemvalue="Python.check_ConvTrans" />
-        <item itemvalue="Python.check_Batch_Normalization2D" />
       </list>
     </recent_temporary>
   </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -373,56 +358,6 @@
     <MESSAGE value="grad_check" />
     <MESSAGE value="seq2seq" />
     <option name="LAST_COMMIT_MESSAGE" value="seq2seq" />
-  </component>
-  <component name="WindowStateProjectService">
-    <state x="357" y="83" key="#xdebugger.evaluate" timestamp="1588858809763">
-      <screen x="0" y="0" width="1200" height="760" />
-    </state>
-    <state x="357" y="83" key="#xdebugger.evaluate/0.0.1200.760@0.0.1200.760" timestamp="1588858809763" />
-    <state x="106" y="214" key="FileChooserDialogImpl" timestamp="1588842724670">
-      <screen x="0" y="0" width="1200" height="760" />
-    </state>
-    <state x="106" y="214" key="FileChooserDialogImpl/0.0.1200.760@0.0.1200.760" timestamp="1588842724670" />
-    <state width="1179" height="237" key="GridCell.Tab.0.bottom" timestamp="1588943540771">
-      <screen x="0" y="0" width="1200" height="760" />
-    </state>
-    <state width="1179" height="237" key="GridCell.Tab.0.bottom/0.0.1200.760@0.0.1200.760" timestamp="1588943540771" />
-    <state width="1179" height="237" key="GridCell.Tab.0.center" timestamp="1588943540771">
-      <screen x="0" y="0" width="1200" height="760" />
-    </state>
-    <state width="1179" height="237" key="GridCell.Tab.0.center/0.0.1200.760@0.0.1200.760" timestamp="1588943540771" />
-    <state width="1179" height="237" key="GridCell.Tab.0.left" timestamp="1588943540771">
-      <screen x="0" y="0" width="1200" height="760" />
-    </state>
-    <state width="1179" height="237" key="GridCell.Tab.0.left/0.0.1200.760@0.0.1200.760" timestamp="1588943540771" />
-    <state width="1179" height="237" key="GridCell.Tab.0.right" timestamp="1588943540771">
-      <screen x="0" y="0" width="1200" height="760" />
-    </state>
-    <state width="1179" height="237" key="GridCell.Tab.0.right/0.0.1200.760@0.0.1200.760" timestamp="1588943540771" />
-    <state width="1179" height="237" key="GridCell.Tab.1.bottom" timestamp="1588943540771">
-      <screen x="0" y="0" width="1200" height="760" />
-    </state>
-    <state width="1179" height="237" key="GridCell.Tab.1.bottom/0.0.1200.760@0.0.1200.760" timestamp="1588943540771" />
-    <state width="1179" height="237" key="GridCell.Tab.1.center" timestamp="1588943540771">
-      <screen x="0" y="0" width="1200" height="760" />
-    </state>
-    <state width="1179" height="237" key="GridCell.Tab.1.center/0.0.1200.760@0.0.1200.760" timestamp="1588943540771" />
-    <state width="1179" height="237" key="GridCell.Tab.1.left" timestamp="1588943540771">
-      <screen x="0" y="0" width="1200" height="760" />
-    </state>
-    <state width="1179" height="237" key="GridCell.Tab.1.left/0.0.1200.760@0.0.1200.760" timestamp="1588943540771" />
-    <state width="1179" height="237" key="GridCell.Tab.1.right" timestamp="1588943540771">
-      <screen x="0" y="0" width="1200" height="760" />
-    </state>
-    <state width="1179" height="237" key="GridCell.Tab.1.right/0.0.1200.760@0.0.1200.760" timestamp="1588943540771" />
-    <state x="103" y="26" key="SettingsEditor" timestamp="1588943518423">
-      <screen x="0" y="0" width="1200" height="760" />
-    </state>
-    <state x="103" y="26" key="SettingsEditor/0.0.1200.760@0.0.1200.760" timestamp="1588943518423" />
-    <state x="263" y="81" width="672" height="678" key="search.everywhere.popup" timestamp="1588858489321">
-      <screen x="0" y="0" width="1200" height="760" />
-    </state>
-    <state x="263" y="81" width="672" height="678" key="search.everywhere.popup/0.0.1200.760@0.0.1200.760" timestamp="1588858489321" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

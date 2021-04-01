@@ -1,11 +1,10 @@
 import numpy as np
 
 """
-    binary cross entropy
+    二分类 loss
 """
-
-
 class BinaryCrossEntropy:
+
 
     def __init__(self):
         self.last_y_true = None
