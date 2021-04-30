@@ -20,17 +20,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="75204f01-2a62-4ce8-86c3-e8913647609a" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/simpleNet/layers/attention.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/SimpleNet.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/SimpleNet.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/mnist_cnn.py" beforeDir="false" afterPath="$PROJECT_DIR$/examples/mnist_cnn.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simpleNet/layers/Dense.py" beforeDir="false" afterPath="$PROJECT_DIR$/simpleNet/layers/Dense.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simpleNet/losses/BinaryCrossEntropy.py" beforeDir="false" afterPath="$PROJECT_DIR$/simpleNet/losses/BinaryCrossEntropy.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simpleNet/losses/MeanSqauredError.py" beforeDir="false" afterPath="$PROJECT_DIR$/simpleNet/losses/MeanSqauredError.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simpleNet/losses/SoftmaxCrossEntropy.py" beforeDir="false" afterPath="$PROJECT_DIR$/simpleNet/losses/SoftmaxCrossEntropy.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simpleNet/optims/RMSProp.py" beforeDir="false" afterPath="$PROJECT_DIR$/simpleNet/optims/RMSProp.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simpleNet/optims/SGD.py" beforeDir="false" afterPath="$PROJECT_DIR$/simpleNet/optims/SGD.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/ac_gan.py" beforeDir="false" afterPath="$PROJECT_DIR$/examples/ac_gan.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -72,6 +65,8 @@
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
@@ -85,7 +80,7 @@
       <recent name="C:\Users\57066\Desktop\projects\SimpleNet\simpleNet\loss" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.mnist_cnn">
+  <component name="RunManager" selected="Python.ac_gan">
     <configuration name="ac_gan" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="SimpleNet" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -193,8 +188,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.mnist_cnn" />
         <item itemvalue="Python.ac_gan" />
+        <item itemvalue="Python.mnist_cnn" />
         <item itemvalue="Python.check_Tanh" />
         <item itemvalue="Python.test" />
         <item itemvalue="Python.check_ConvTrans" />

@@ -155,7 +155,7 @@ class RealGen:
 
 
 def one_hot(x):
-    x = x.astype(np.int)
+    x = x.astype(np.int64)
     onehot = np.zeros((x.size, 10))
     onehot[np.arange(x.size), x] = 1
     return onehot
@@ -229,18 +229,18 @@ for i in range(10):
     for j in range(len(real_gen)):
         # 真的一半，训D
         x_imgs, y_cls = real_gen.next_batch(j)  # [N/2, 1, 28, 28], [N/2, ]
-        y_real = np.ones((half_batch, 1), dtype=np.float)
+        y_real = np.ones((half_batch, 1), dtype=np.float32)
         l_s1, l_c1 = train_discriminator(x_imgs, y_real, one_hot(y_cls))
 
         # 假的一半，训D
         latent, y_cls = latent_gen(half_batch)
         x_imgs = generator(latent, y_cls)
-        y_real = np.zeros((half_batch, 1), dtype=np.float)
+        y_real = np.zeros((half_batch, 1), dtype=np.float32)
         l_s2, l_c2 = train_discriminator(x_imgs, y_real, one_hot(y_cls))
 
         # 假的训G
         latent, y_cls = latent_gen(batch_size)
-        y_real = np.ones((batch_size, 1), dtype=np.float)
+        y_real = np.ones((batch_size, 1), dtype=np.float32)
         l_s3, l_c3 = train_generator(latent, y_real, y_cls)
 
         # print(l_s1, l_c1)
@@ -268,6 +268,5 @@ for i in range(10):
         y_real = np.expand_dims(np.array(y_real, dtype=np.float), -1)
         l_s1, l_c1 = train_discriminator(x_imgs, y_real, one_hot(y_cls))
         print(l_s1, l_c1)
-
 
 
